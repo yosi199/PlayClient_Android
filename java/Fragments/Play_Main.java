@@ -2,6 +2,7 @@ package Fragments;
 
 import android.app.Fragment;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +29,9 @@ public class Play_Main extends Fragment {
     private static final String BACK = "back";
     private static final String FORWARD = "forward";
     private static final String SetSHUFFLE = "shuffle";
-    TextView tv1;
+//    private static final String CONNECT = "connect";
+
+    private TextView tv1;
     private TCPCLIENT mTCPCLIENT = null;
     private Button connectButton;
     private Button play;
@@ -47,82 +50,126 @@ public class Play_Main extends Fragment {
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
         connectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                                             @Override
+                                             public void onClick(View view) {
 
-                new connectTask().execute("");
-                wait_A_Few(connectButton, waitTime);
+                                                 new connectTask().execute("");
+                                                 wait_A_Few(connectButton, waitTime);
 
-            }
-        });
+                                                 final Thread t = new Thread(new Runnable() {
+                                                     @Override
+                                                     public void run() {
+                                                         while (mTCPCLIENT == null) {
+                                                             Log.e("sad", "NULL");
+
+                                                             try {
+                                                                 Thread.sleep(500);
+                                                                 if (mTCPCLIENT != null) {
+                                                                     mTCPCLIENT.sendMessage(getDeviceName());
+                                                                     break;
+                                                                 }
+                                                             } catch (Exception e) {
+                                                             }
+                                                         }
+
+                                                         if (mTCPCLIENT != null) {
+                                                             mTCPCLIENT.sendMessage(getDeviceName());
+                                                             Log.e("sad", "NOT NULL");
+                                                         }
+
+                                                     }
+
+
+                                                 }
+                                                 );
+                                                 t.start();
+                                             }
+                                         }
+        );
 
         play = (Button) view.findViewById(R.id.playBT);
-        play.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mTCPCLIENT != null) {
-                    mTCPCLIENT.sendMessage(PLAY);
-                    wait_A_Few(play, waitTime);
-                }
-            }
-        });
+        play.setOnClickListener(new View.OnClickListener()
+
+                                {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if (mTCPCLIENT != null) {
+                                            mTCPCLIENT.sendMessage(PLAY);
+                                            wait_A_Few(play, waitTime);
+                                        }
+                                    }
+                                }
+        );
 
         back = (Button) view.findViewById(R.id.backBT);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mTCPCLIENT != null) {
+        back.setOnClickListener(new View.OnClickListener()
 
-                    mTCPCLIENT.sendMessage(BACK);
-                    wait_A_Few(back, waitTime);
-                }
-            }
-        });
+                                {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if (mTCPCLIENT != null) {
+
+                                            mTCPCLIENT.sendMessage(BACK);
+                                            wait_A_Few(back, waitTime);
+                                        }
+                                    }
+                                }
+        );
 
         forward = (Button) view.findViewById(R.id.forwardBT);
-        forward.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mTCPCLIENT != null) {
-                    mTCPCLIENT.sendMessage(FORWARD);
-                    wait_A_Few(forward, waitTime);
+        forward.setOnClickListener(new View.OnClickListener()
+
+                                   {
+                                       @Override
+                                       public void onClick(View view) {
+                                           if (mTCPCLIENT != null) {
+                                               mTCPCLIENT.sendMessage(FORWARD);
+                                               wait_A_Few(forward, waitTime);
 
 
-                }
+                                           }
 
-            }
+                                       }
 
-        });
+                                   }
+        );
 
         stop = (Button) view.findViewById(R.id.stopBT);
-        stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mTCPCLIENT != null) {
-                    mTCPCLIENT.sendMessage(STOP);
-                    wait_A_Few(stop, waitTime);
-                }
-            }
-        });
+        stop.setOnClickListener(new View.OnClickListener()
+
+                                {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if (mTCPCLIENT != null) {
+                                            mTCPCLIENT.sendMessage(STOP);
+                                            wait_A_Few(stop, waitTime);
+                                        }
+                                    }
+                                }
+        );
 
         tv1 = (TextView) view.findViewById(R.id.tv1);
         tv1.setText("Connect and start playing");
 
-        shuffle = (CheckBox)view.findViewById(R.id.shuffle);
-        shuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mTCPCLIENT!=null){
-                    mTCPCLIENT.sendMessage(SetSHUFFLE);
-                    wait_A_Few(shuffle, waitTime);
-                }
-            }
-        });
+        shuffle = (CheckBox) view.findViewById(R.id.shuffle);
+        shuffle.setOnClickListener(new View.OnClickListener()
+
+                                   {
+                                       @Override
+                                       public void onClick(View view) {
+                                           if (mTCPCLIENT != null) {
+                                               mTCPCLIENT.sendMessage(SetSHUFFLE);
+                                               wait_A_Few(shuffle, waitTime);
+                                           }
+                                       }
+                                   }
+        );
 
         return view;
     }
 
     // A timer function to disable button
+
     private void wait_A_Few(Button b, int time) {
 
         final Button bt = b;
@@ -185,6 +232,33 @@ public class Play_Main extends Fragment {
             tv1.setText(values[0]);
             Log.d("Server", "" + values[0]);
         }
+    }
+
+    private String getDeviceName() {
+        String Manufacturer = Build.MANUFACTURER;
+        String Model = Build.MODEL;
+
+        if (Model.startsWith(Manufacturer)) {
+            return capitilize(Model);
+        } else {
+            return capitilize(Manufacturer) + " " + Model;
+        }
+    }
+
+
+    private String capitilize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
+
     }
 
 }

@@ -51,6 +51,11 @@ public class TCPCLIENT {
 
             Socket socket = new Socket(serverAddress, SERVERPORT);
 
+            if (socket.isConnected()) {
+                Log.e("TCP Client", "Connected!");
+
+            }
+
             try {
 
                 out = new PrintWriter(socket.getOutputStream(), true);
@@ -73,6 +78,8 @@ public class TCPCLIENT {
             } catch (Exception e) {
 
                 Log.e("TCP", "S: Error", e);
+                mMessageListener.messageReceived("Disconnected");
+
 
             } finally {
                 //the socket must be closed. It is not possible to reconnect to this socket
