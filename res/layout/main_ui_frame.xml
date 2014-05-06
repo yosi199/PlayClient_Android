@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/relative"
+                android:layout_gravity="center">
+
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:id="@+id/linearLayout">
+
+        <Button
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Back"
+                android:id="@+id/backBT"
+                android:layout_alignBottom="@+id/playBT"
+                android:layout_toLeftOf="@+id/playBT"/>
+
+        <Button
+                android:layout_width="100dp"
+                android:layout_height="fill_parent"
+                android:text="Stop"
+                android:id="@+id/stopBT"
+                android:layout_above="@+id/linearLayout"
+                android:layout_centerHorizontal="true"/>
+
+        <Button
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Forward"
+                android:id="@+id/forwardBT"
+                android:layout_alignBottom="@+id/playBT"
+                android:layout_toRightOf="@+id/playBT"/>
+
+
+    </LinearLayout>
+
+    <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:id="@+id/connectBT"
+            android:layout_below="@+id/linearLayout"
+            android:layout_centerHorizontal="true"/>
+
+    <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Play"
+            android:id="@+id/playBT"
+            android:layout_above="@+id/linearLayout"
+            android:layout_centerHorizontal="true"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/tv1"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Shuffle"
+        android:id="@+id/shuffle"
+        android:layout_below="@+id/connectBT"
+        android:layout_centerHorizontal="true"
+        android:checked="false" />
+</RelativeLayout>
