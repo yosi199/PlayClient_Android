@@ -77,8 +77,9 @@ public class TCPCLIENT {
 
             } catch (Exception e) {
 
-                Log.e("TCP", "S: Error", e);
+                Log.e("TCP", "S: Error");
                 mMessageListener.messageReceived("Disconnected");
+                run();
 
 
             } finally {
