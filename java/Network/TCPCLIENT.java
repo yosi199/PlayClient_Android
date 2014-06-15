@@ -9,23 +9,31 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by Unknown1 on 7/12/13.
  */
 public class TCPCLIENT {
 
+    // Server connection info
     public static final String SERVERIP = "10.0.0.5";
     public static final int SERVERPORT = 5555;
-    private String serverMessage;
+    // Server readers/writers
     private boolean mRun = false;
+    private PrintWriter out;
+    private BufferedReader in;
+    // Registered listener to pass messages to UI
     private OnMessageReceived mMessageListener = null;
+    private String serverMessage;
 
-    PrintWriter out;
-    BufferedReader in;
+    public static CountDownLatch mCountDown;
+
+
 
     public TCPCLIENT(OnMessageReceived listener) {
         mMessageListener = listener;
+        mCountDown = new CountDownLatch(1);
 
     }
 
@@ -53,7 +61,12 @@ public class TCPCLIENT {
 
             if (socket.isConnected()) {
                 Log.e("TCP Client", "Connected!");
+                mCountDown.countDown();
 
+            }
+
+            else if (!socket.isConnected()){
+                mCountDown.countDown();
             }
 
             try {

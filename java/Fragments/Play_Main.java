@@ -13,9 +13,12 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.loop_to_infinity.play.PlayClient;
 import com.loop_to_infinity.play.R;
 
+import Messages.PlayMessageObject;
+import Messages.StopMessageObject;
 import Network.TCPCLIENT;
 
 
@@ -24,13 +27,18 @@ import Network.TCPCLIENT;
  */
 public class Play_Main extends Fragment {
 
+
+    // static Constants
     private static final String PLAY = "play";
     private static final String STOP = "stop";
     private static final String BACK = "back";
     private static final String FORWARD = "forward";
     private static final String SetSHUFFLE = "shuffle";
+
+    private static final String TAG = "Play_Main_Fragment";
 //    private static final String CONNECT = "connect";
 
+    // Views and fields
     private TextView tv1;
     private TCPCLIENT mTCPCLIENT = null;
     private Button connectButton;
@@ -40,49 +48,43 @@ public class Play_Main extends Fragment {
     private Button stop;
     private CheckBox shuffle;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.main_ui_frame, container, false);
         super.onCreateView(inflater, container, null);
 
-        final int waitTime = 1000;
-
+        final Gson jsonMaker = new Gson();
+//        final PlayMessageObject defaultMessages = new PlayMessageObject();
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
         connectButton.setOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View view) {
-
+                                                 // Disable button until a connection is made
+                                                 connectButton.setEnabled(false);
+                                                 // Create a server instance and connect
                                                  new connectTask().execute("");
-                                                 wait_A_Few(connectButton, waitTime);
-
-                                                 final Thread t = new Thread(new Runnable() {
+                                                 // Wait until the client is connected and then release the button
+                                                 new Thread(new Runnable() {
                                                      @Override
                                                      public void run() {
-                                                         while (mTCPCLIENT == null) {
-                                                             Log.e("sad", "NULL");
+                                                         try {
+                                                             TCPCLIENT.mCountDown.await();
+                                                         } catch (InterruptedException ie) {
+                                                             ie.getMessage();
+                                                         }
 
-                                                             try {
-                                                                 Thread.sleep(500);
-                                                                 if (mTCPCLIENT != null) {
-                                                                     mTCPCLIENT.sendMessage(getDeviceName());
-                                                                     break;
-                                                                 }
-                                                             } catch (Exception e) {
+                                                         // when a connection is made, enable the button again
+                                                         connectButton.post(new Runnable() {
+                                                             @Override
+                                                             public void run() {
+                                                                 connectButton.setEnabled(true);
                                                              }
-                                                         }
-
-                                                         if (mTCPCLIENT != null) {
-                                                             mTCPCLIENT.sendMessage(getDeviceName());
-                                                             Log.e("sad", "NOT NULL");
-                                                         }
+                                                         });
 
                                                      }
-
-
-                                                 }
-                                                 );
-                                                 t.start();
+                                                 }).start();
                                              }
                                          }
         );
@@ -93,9 +95,12 @@ public class Play_Main extends Fragment {
                                 {
                                     @Override
                                     public void onClick(View view) {
+
+                                        String json = jsonMaker.toJson(new PlayMessageObject());
+                                        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+
                                         if (mTCPCLIENT != null) {
-                                            mTCPCLIENT.sendMessage(PLAY);
-                                            wait_A_Few(play, waitTime);
+                                            mTCPCLIENT.sendMessage(json);
                                         }
                                     }
                                 }
@@ -110,7 +115,7 @@ public class Play_Main extends Fragment {
                                         if (mTCPCLIENT != null) {
 
                                             mTCPCLIENT.sendMessage(BACK);
-                                            wait_A_Few(back, waitTime);
+
                                         }
                                     }
                                 }
@@ -124,7 +129,6 @@ public class Play_Main extends Fragment {
                                        public void onClick(View view) {
                                            if (mTCPCLIENT != null) {
                                                mTCPCLIENT.sendMessage(FORWARD);
-                                               wait_A_Few(forward, waitTime);
 
 
                                            }
@@ -140,9 +144,11 @@ public class Play_Main extends Fragment {
                                 {
                                     @Override
                                     public void onClick(View view) {
+                                        String json = jsonMaker.toJson(new StopMessageObject());
+                                        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
                                         if (mTCPCLIENT != null) {
+
                                             mTCPCLIENT.sendMessage(STOP);
-                                            wait_A_Few(stop, waitTime);
                                         }
                                     }
                                 }
@@ -159,7 +165,6 @@ public class Play_Main extends Fragment {
                                        public void onClick(View view) {
                                            if (mTCPCLIENT != null) {
                                                mTCPCLIENT.sendMessage(SetSHUFFLE);
-                                               wait_A_Few(shuffle, waitTime);
                                            }
                                        }
                                    }
@@ -168,42 +173,6 @@ public class Play_Main extends Fragment {
         return view;
     }
 
-    // A timer function to disable button
-
-    private void wait_A_Few(Button b, int time) {
-
-        final Button bt = b;
-        final int timeWait = time;
-
-        // Disable button
-        bt.setEnabled(false);
-
-
-        // Wait X seconds and enable it again
-        Thread wait_A_Second = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    synchronized (this) {
-                        wait(timeWait);
-                        getActivity().runOnUiThread((new Runnable() {
-                            public void run() {
-                                bt.setEnabled(true);
-                            }
-                        }));
-
-
-                    }
-                } catch (InterruptedException ex) {
-                    Log.d("Thread", "Button" + bt.getText() + " Couldn't be disabled");
-
-                }
-            }
-        };
-
-        wait_A_Second.start();
-
-    }
 
     public class connectTask extends AsyncTask<String, String, TCPCLIENT> {
 
@@ -234,6 +203,7 @@ public class Play_Main extends Fragment {
         }
     }
 
+    // Get device name to inform server who connected
     private String getDeviceName() {
         String Manufacturer = Build.MANUFACTURER;
         String Model = Build.MODEL;
