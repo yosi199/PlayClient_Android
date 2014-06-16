@@ -20,6 +20,8 @@ import com.google.gson.Gson;
 import com.loop_to_infinity.play.PlayClient;
 import com.loop_to_infinity.play.R;
 
+import Messages.BackwardMessageObject;
+import Messages.ForwardMessageObject;
 import Messages.PlayMessageObject;
 import Messages.StopMessageObject;
 import Network.TCPCLIENT;
@@ -32,11 +34,11 @@ public class Play_Main extends Fragment {
 
 
     // static Constants
-    private static final String PLAY = "play";
-    private static final String STOP = "stop";
-    private static final String BACK = "back";
-    private static final String FORWARD = "forward";
-    private static final String SetSHUFFLE = "shuffle";
+    private static final String PLAY = "Play";
+    private static final String STOP = "Stop";
+    private static final String BACK = "Back";
+    private static final String FORWARD = "Forward";
+    private static final String SetSHUFFLE = "Shuffle";
 
     private static final String TAG = "Play_Main_Fragment";
 //    private static final String CONNECT = "connect";
@@ -119,8 +121,13 @@ public class Play_Main extends Fragment {
                                     @Override
                                     public void onClick(View view) {
                                         if (mTCPCLIENT != null) {
+                                            String json = jsonMaker.toJson(new BackwardMessageObject());
+                                            Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+                                            if (mTCPCLIENT != null) {
 
-                                            mTCPCLIENT.sendMessage(BACK);
+                                                mTCPCLIENT.sendMessage(json);
+                                            }
+
 
                                         }
                                     }
@@ -134,7 +141,12 @@ public class Play_Main extends Fragment {
                                        @Override
                                        public void onClick(View view) {
                                            if (mTCPCLIENT != null) {
-                                               mTCPCLIENT.sendMessage(FORWARD);
+                                               String json = jsonMaker.toJson(new ForwardMessageObject());
+                                               Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+                                               if (mTCPCLIENT != null) {
+
+                                                   mTCPCLIENT.sendMessage(json);
+                                               }
 
 
                                            }
@@ -154,7 +166,7 @@ public class Play_Main extends Fragment {
                                         Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
                                         if (mTCPCLIENT != null) {
 
-                                            mTCPCLIENT.sendMessage(STOP);
+                                            mTCPCLIENT.sendMessage(json);
                                         }
                                     }
                                 }

@@ -6,14 +6,14 @@ import com.google.gson.annotations.Expose;
  * Created by Unknown1 on 6/15/14.
  */
 
-public class StopMessageObject {
+public class BackwardMessageObject {
 
-    public StopMessageObject() {
+    public BackwardMessageObject() {
 
     }
 
     @Expose
-    private String MessageType = "Stop";
+    private String MessageType = "Backward";
 
 
     public String getMessageType() {

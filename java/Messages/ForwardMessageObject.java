@@ -6,14 +6,14 @@ import com.google.gson.annotations.Expose;
  * Created by Unknown1 on 6/15/14.
  */
 
-public class StopMessageObject {
+public class ForwardMessageObject {
 
-    public StopMessageObject() {
+    public ForwardMessageObject() {
 
     }
 
     @Expose
-    private String MessageType = "Stop";
+    private String MessageType = "Forward";
 
 
     public String getMessageType() {
