@@ -6,6 +6,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,6 +51,7 @@ public class Play_Main extends Fragment {
     private Button stop;
     private CheckBox shuffle;
 
+    private Play_Main mainFrag;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +60,8 @@ public class Play_Main extends Fragment {
 
         final Gson jsonMaker = new Gson();
 //        final PlayMessageObject defaultMessages = new PlayMessageObject();
+
+        mainFrag = this;
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
         connectButton.setOnClickListener(new View.OnClickListener() {
@@ -230,5 +236,26 @@ public class Play_Main extends Fragment {
         }
 
     }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu, inflater);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.restart:
+                new connectTask().execute("");
+                break;
+
+        }
+
+        return false;
+    }
+
 
 }

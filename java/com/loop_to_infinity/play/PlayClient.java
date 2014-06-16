@@ -7,11 +7,13 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import Fragments.Play_Main;
 
 public class PlayClient extends Activity {
     public static Context ctx = null;
+    public Fragment main;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +21,7 @@ public class PlayClient extends Activity {
         setContentView(R.layout.main_layout);
         ctx = this;
 
-        Fragment main = new Play_Main();
+        main = new Play_Main();
 
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
@@ -33,6 +35,13 @@ public class PlayClient extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.play_client, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+
+
         return true;
     }
 

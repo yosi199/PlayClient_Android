@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
+import Messages.MessageManager;
+
 /**
  * Created by Unknown1 on 7/12/13.
  */
@@ -26,20 +28,19 @@ public class TCPCLIENT {
     // Registered listener to pass messages to UI
     private OnMessageReceived mMessageListener = null;
     private String serverMessage;
+    private MessageManager messageHandler = null;
 
-    public static CountDownLatch mCountDown;
-
+    public static CountDownLatch mCountDown = new CountDownLatch(1);
 
 
     public TCPCLIENT(OnMessageReceived listener) {
         mMessageListener = listener;
-        mCountDown = new CountDownLatch(1);
 
     }
 
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
-            out.println(message);
+            out.println(message + "<EOF>");
             out.flush();
         }
     }
@@ -76,10 +77,14 @@ public class TCPCLIENT {
 
                 while (mRun) {
                     serverMessage = in.readLine();
+                    messageHandler = MessageManager.Instance();
+                    messageHandler.figureMessageType(serverMessage, mMessageListener);
+
+                    Log.d("dasd", serverMessage);
 
                     if (serverMessage != null && mMessageListener != null) {
                         //call the method messageReceived from MyActivity class
-                        mMessageListener.messageReceived(serverMessage);
+                        //      mMessageListener.messageReceived(serverMessage);
 
 
                     }
@@ -90,8 +95,8 @@ public class TCPCLIENT {
 
             } catch (Exception e) {
 
-                Log.e("TCP", "S: Error");
-                mMessageListener.messageReceived("Disconnected");
+
+                Log.e("TCP", "S: Error - " + e.getMessage());
                 run();
 
 
