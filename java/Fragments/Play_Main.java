@@ -32,12 +32,6 @@ import Network.TCPCLIENT;
  */
 public class Play_Main extends Fragment {
 
-
-    // static Constants
-    private static final String PLAY = "Play";
-    private static final String STOP = "Stop";
-    private static final String BACK = "Back";
-    private static final String FORWARD = "Forward";
     private static final String SetSHUFFLE = "Shuffle";
 
     private static final String TAG = "Play_Main_Fragment";
