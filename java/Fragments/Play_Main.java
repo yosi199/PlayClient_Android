@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
 import com.loop_to_infinity.play.PlayClient;
 import com.loop_to_infinity.play.R;
 
@@ -73,6 +74,8 @@ public class Play_Main extends Fragment {
                                                      public void run() {
                                                          try {
                                                              TCPCLIENT.mCountDown.await();
+                                                             String json = jsonMaker.toJson(new DeviceInfo());
+                                                             mTCPCLIENT.sendMessage(json);
                                                          } catch (InterruptedException ie) {
                                                              ie.getMessage();
                                                          }
@@ -82,6 +85,7 @@ public class Play_Main extends Fragment {
                                                              @Override
                                                              public void run() {
                                                                  connectButton.setEnabled(true);
+
                                                              }
                                                          });
 
@@ -215,34 +219,6 @@ public class Play_Main extends Fragment {
         }
     }
 
-    // Get device name to inform server who connected
-    private String getDeviceName() {
-        String Manufacturer = Build.MANUFACTURER;
-        String Model = Build.MODEL;
-
-        if (Model.startsWith(Manufacturer)) {
-            return capitilize(Model);
-        } else {
-            return capitilize(Manufacturer) + " " + Model;
-        }
-    }
-
-
-    private String capitilize(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
-        }
-
-        char first = s.charAt(0);
-        if (Character.isUpperCase(first)) {
-            return s;
-
-        } else {
-            return Character.toUpperCase(first) + s.substring(1);
-        }
-
-    }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -263,5 +239,46 @@ public class Play_Main extends Fragment {
         return false;
     }
 
+    /**
+     * Inner class to get device Name for use by server
+     */
+    private class DeviceInfo {
+
+        @Expose
+        private String deviceName = getDevice();
+
+        @Expose
+        private String MessageType = "DeviceInfo";
+
+        public DeviceInfo() {
+        }
+
+        // Get device name to inform server who connected
+        private String getDevice() {
+            String Manufacturer = Build.MANUFACTURER;
+            String Model = Build.MODEL;
+
+            if (Model.startsWith(Manufacturer)) {
+                return capitilize(Model);
+            } else {
+                return capitilize(Manufacturer) + " " + Model;
+            }
+        }
+
+        private String capitilize(String s) {
+            if (s == null || s.length() == 0) {
+                return "";
+            }
+
+            char first = s.charAt(0);
+            if (Character.isUpperCase(first)) {
+                return s;
+
+            } else {
+                return Character.toUpperCase(first) + s.substring(1);
+            }
+
+        }
+    }
 
 }
