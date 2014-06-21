@@ -54,6 +54,7 @@ public class Play_Main extends Fragment implements IListener {
     private CheckBox shuffle;
     private int _currentVolume;
     private int _originalVolume;
+    private Boolean runUpdates = true;
 
     private Play_Main mainFrag;
 
@@ -83,10 +84,29 @@ public class Play_Main extends Fragment implements IListener {
                                                      @Override
                                                      public void run() {
                                                          try {
+                                                             // Once client is connected, give the server some info about client
                                                              TCPCLIENT.mCountDown.await();
                                                              mTCPCLIENT.RegisterListener(mainFrag);
                                                              String json = jsonMaker.toJson(new DeviceInfo());
                                                              mTCPCLIENT.sendMessage(json);
+
+                                                             // Communicate with the server every 3 seconds to keep alive and get updates
+                                                             new Thread(new Runnable() {
+                                                                 @Override
+                                                                 public void run() {
+                                                                     while (runUpdates) {
+
+                                                                         try {
+                                                                             Thread.sleep(3000);
+                                                                             String json = jsonMaker.toJson(new DeviceInfo());
+                                                                             mTCPCLIENT.sendMessage(json);
+                                                                         } catch (InterruptedException e) {
+                                                                             e.printStackTrace();
+                                                                         }
+                                                                     }
+
+                                                                 }
+                                                             }).run();
 
                                                          } catch (InterruptedException ie) {
                                                              ie.getMessage();
@@ -116,11 +136,7 @@ public class Play_Main extends Fragment implements IListener {
                                     public void onClick(View view) {
 
                                         String json = jsonMaker.toJson(new PlayMessageObject());
-                                        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-
-                                        if (mTCPCLIENT != null) {
-                                            mTCPCLIENT.sendMessage(json);
-                                        }
+                                        DispatchToServer(json);
                                     }
                                 }
         );
@@ -133,13 +149,7 @@ public class Play_Main extends Fragment implements IListener {
                                     public void onClick(View view) {
                                         if (mTCPCLIENT != null) {
                                             String json = jsonMaker.toJson(new BackwardMessageObject());
-                                            Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-                                            if (mTCPCLIENT != null) {
-
-                                                mTCPCLIENT.sendMessage(json);
-                                            }
-
-
+                                            DispatchToServer(json);
                                         }
                                     }
                                 }
@@ -153,13 +163,7 @@ public class Play_Main extends Fragment implements IListener {
                                        public void onClick(View view) {
                                            if (mTCPCLIENT != null) {
                                                String json = jsonMaker.toJson(new ForwardMessageObject());
-                                               Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-                                               if (mTCPCLIENT != null) {
-
-                                                   mTCPCLIENT.sendMessage(json);
-                                               }
-
-
+                                               DispatchToServer(json);
                                            }
 
                                        }
@@ -174,11 +178,7 @@ public class Play_Main extends Fragment implements IListener {
                                     @Override
                                     public void onClick(View view) {
                                         String json = jsonMaker.toJson(new StopMessageObject());
-                                        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-                                        if (mTCPCLIENT != null) {
-
-                                            mTCPCLIENT.sendMessage(json);
-                                        }
+                                        DispatchToServer(json);
                                     }
                                 }
         );
@@ -381,4 +381,11 @@ public class Play_Main extends Fragment implements IListener {
         }
     }
 
+    private void DispatchToServer(String json) {
+        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+
+        if (mTCPCLIENT != null) {
+            mTCPCLIENT.sendMessage(json);
+        }
+    }
 }

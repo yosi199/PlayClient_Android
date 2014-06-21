@@ -80,6 +80,7 @@ public class TCPCLIENT implements ISubject {
 
                 while (mRun) {
                     serverMessage = in.readLine();
+                    Log.d("dasd", serverMessage);
                     messageHandler = MessageManager.Instance();
                     Object obj = messageHandler.figureMessageType(serverMessage, mMessageListener);
 
@@ -91,8 +92,6 @@ public class TCPCLIENT implements ISubject {
 
                     }
 
-
-                    Log.d("dasd", serverMessage);
 
                     if (serverMessage != null && mMessageListener != null) {
                         //call the method messageReceived from MyActivity class
