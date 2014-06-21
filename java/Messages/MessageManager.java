@@ -32,7 +32,9 @@ public class MessageManager {
 
     }
 
-    public void figureMessageType(String message, TCPCLIENT.OnMessageReceived mMessageListener) {
+    public Object figureMessageType(String message, TCPCLIENT.OnMessageReceived mMessageListener) {
+
+        Object obj = null;
 
         if (message.length() > 0) {
 
@@ -46,13 +48,23 @@ public class MessageManager {
                         Gson gson = new GsonBuilder().create();
                         Song song = gson.fromJson(message, Song.class);
                         mMessageListener.messageReceived(song.getArtistName() + " - " + song.getTitleName());
+                        obj = song;
                     } catch (Exception e) {
                         Log.d(TAG, e.getMessage());
                     }
                     break;
 
+                case "Status":
+                    Gson gson = new GsonBuilder().create();
+                    ServerStatusMessage statusMessage = gson.fromJson(message, ServerStatusMessage.class);
+                    obj = statusMessage;
+                    break;
+                default:
+                    obj = null;
             }
 
         }
+
+        return obj;
     }
 }

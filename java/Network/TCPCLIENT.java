@@ -11,12 +11,15 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
+import Interfaces.IListener;
+import Interfaces.ISubject;
 import Messages.MessageManager;
+import Messages.ServerStatusMessage;
 
 /**
  * Created by Unknown1 on 7/12/13.
  */
-public class TCPCLIENT {
+public class TCPCLIENT implements ISubject {
 
     // Server connection info
     public static final String SERVERIP = "10.0.0.5";
@@ -27,8 +30,10 @@ public class TCPCLIENT {
     private BufferedReader in;
     // Registered listener to pass messages to UI
     private OnMessageReceived mMessageListener = null;
+    private IListener mUpdatesListener;
     private String serverMessage;
     private MessageManager messageHandler = null;
+    private ServerStatusMessage _statusMessageObject;
 
     public static CountDownLatch mCountDown = new CountDownLatch(1);
 
@@ -62,23 +67,28 @@ public class TCPCLIENT {
 
             if (socket.isConnected()) {
                 Log.e("TCP Client", "Connected!");
-                mCountDown.countDown();
 
             }
 
-            else if (!socket.isConnected()){
-                mCountDown.countDown();
-            }
 
             try {
 
                 out = new PrintWriter(socket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                mCountDown.countDown();
 
                 while (mRun) {
                     serverMessage = in.readLine();
                     messageHandler = MessageManager.Instance();
-                    messageHandler.figureMessageType(serverMessage, mMessageListener);
+                    Object obj = messageHandler.figureMessageType(serverMessage, mMessageListener);
+
+                    // Check to see if message replied with a status update
+                    if (obj instanceof ServerStatusMessage) {
+                        _statusMessageObject = (ServerStatusMessage) obj;
+                        NotifyUpdates();
+
+                    }
+
 
                     Log.d("dasd", serverMessage);
 
@@ -114,7 +124,23 @@ public class TCPCLIENT {
         }
     }
 
+    public ServerStatusMessage getStatusUpdate() {
+        return _statusMessageObject;
+    }
+
+    @Override
+    public void RegisterListener(IListener listener) {
+        mUpdatesListener = listener;
+    }
+
+    @Override
+    public void NotifyUpdates() {
+        mUpdatesListener.UpdateInfo();
+
+    }
+
     public interface OnMessageReceived {
         public void messageReceived(String message);
     }
+
 }

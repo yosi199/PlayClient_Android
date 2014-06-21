@@ -75,4 +75,20 @@
         android:layout_below="@+id/connectBT"
         android:layout_centerHorizontal="true"
         android:checked="false" />
+
+    <SeekBar
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="44dp"
+        android:indeterminate="false" />
+
+    <MediaController
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mediaController"
+        android:layout_below="@+id/tv1"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
