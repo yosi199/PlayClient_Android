@@ -28,9 +28,10 @@ public class TCPCLIENT implements ISubject {
     private boolean mRun = false;
     private PrintWriter out;
     private BufferedReader in;
-    // Registered listener to pass messages to UI
+    // Registered listeners to pass messages to UI
     private OnMessageReceived mMessageListener = null;
     private IListener mUpdatesListener;
+    // Some instance variables
     private String serverMessage;
     private MessageManager messageHandler = null;
     private ServerStatusMessage _statusMessageObject;
@@ -85,6 +86,7 @@ public class TCPCLIENT implements ISubject {
                     // Check to see if message replied with a status update
                     if (obj instanceof ServerStatusMessage) {
                         _statusMessageObject = (ServerStatusMessage) obj;
+                        // Tell UI to GET info it wants
                         NotifyUpdates();
 
                     }
@@ -124,6 +126,7 @@ public class TCPCLIENT implements ISubject {
         }
     }
 
+    // Returns the server status updates object so UI can extract data from.
     public ServerStatusMessage getStatusUpdate() {
         return _statusMessageObject;
     }

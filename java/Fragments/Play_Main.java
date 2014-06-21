@@ -53,6 +53,7 @@ public class Play_Main extends Fragment implements IListener {
     private SeekBar volume;
     private CheckBox shuffle;
     private int _currentVolume;
+    private int _originalVolume;
 
     private Play_Main mainFrag;
 
@@ -184,9 +185,7 @@ public class Play_Main extends Fragment implements IListener {
 
         final VolumeObject volumeObject = new VolumeObject();
 
-
         volume.setMax(100);
-        _currentVolume = volume.getProgress();
         volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -207,10 +206,29 @@ public class Play_Main extends Fragment implements IListener {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                int stepsDifferent = 0;
+
+                if (_currentVolume > _originalVolume) {
+                    Log.d("_currentVolume", "" + _currentVolume);
+                    Log.d("_originalVolume", "" + _originalVolume);
+                    stepsDifferent = _currentVolume - _originalVolume;
+                    Log.d("stepsDifferent", "" + stepsDifferent);
+                    _originalVolume = _currentVolume;
+                } else if (_currentVolume < _originalVolume) {
+                    Log.d("_currentVolume", "" + _currentVolume);
+                    Log.d("_originalVolume", "" + _originalVolume);
+                    stepsDifferent = _originalVolume - _currentVolume;
+                    Log.d("stepsDifferent", "" + stepsDifferent);
+                    _originalVolume = _currentVolume;
+                }
+
+                volumeObject.setProgress(stepsDifferent);
+
                 String json = jsonMaker.toJson(volumeObject);
                 if (mTCPCLIENT != null) {
                     mTCPCLIENT.sendMessage(json);
@@ -248,17 +266,22 @@ public class Play_Main extends Fragment implements IListener {
         final float currentVolume = messageFromServer.getCurrentVolume();
 
         // Manipulate them to fit into seekBar
-        final float inveredCurrentVolume = (currentVolume * (-1));
-        final float invertedMaxVolume = (-1) * (minVolume);
+        //  final float inveredCurrentVolume = (currentVolume * (-1));
+        // final float invertedMaxVolume = (-1) * (minVolume);
 
+        final int maxVolumeFinal = (int) maxVolume;
+        final int currentVolumeFinal = (int) currentVolume;
 
         volume.post(new Runnable() {
             @Override
             public void run() {
-                volume.setMax((int) invertedMaxVolume);
-                volume.setVisibility(View.VISIBLE);
-                volume.setProgress((int) inveredCurrentVolume);
 
+                _currentVolume = currentVolumeFinal;
+                _originalVolume = currentVolumeFinal;
+
+                volume.setMax(maxVolumeFinal);
+                volume.setProgress(currentVolumeFinal);
+                volume.setVisibility(View.VISIBLE);
 
             }
         });
