@@ -88,24 +88,6 @@ public class Play_Main extends Fragment implements IListener {
                                                              String json = jsonMaker.toJson(new DeviceInfo());
                                                              mTCPCLIENT.sendMessage(json);
 
-//                                                             // Communicate with the server every 3 seconds to keep alive and get updates
-//                                                             new Thread(new Runnable() {
-//                                                                 @Override
-//                                                                 public void run() {
-//                                                                     while (runUpdates) {
-//
-//                                                                         try {
-//                                                                             Thread.sleep(3000);
-//                                                                             String json = jsonMaker.toJson(new DeviceInfo());
-//                                                                             mTCPCLIENT.sendMessage(json);
-//                                                                         } catch (InterruptedException e) {
-//                                                                             e.printStackTrace();
-//                                                                         }
-//                                                                     }
-//
-//                                                                 }
-//                                                             }).run();
-
                                                          } catch (InterruptedException ie) {
                                                              ie.getMessage();
                                                          }
