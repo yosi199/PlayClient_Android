@@ -10,6 +10,16 @@ public class ServerStatusMessage {
     private float MaxVolume = 0;
     private float MinVolume = 0;
 
+    public Boolean getIsShuffleOn() {
+        return IsShuffleOn;
+    }
+
+    public void setIsShuffleOn(Boolean isShuffleOn) {
+        IsShuffleOn = isShuffleOn;
+    }
+
+    private Boolean IsShuffleOn = false;
+
     public void setMinVolume(float minVolume) {
         this.MinVolume = minVolume;
     }
