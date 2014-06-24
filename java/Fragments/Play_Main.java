@@ -27,6 +27,7 @@ import Messages.BackwardMessageObject;
 import Messages.ForwardMessageObject;
 import Messages.PlayMessageObject;
 import Messages.ServerStatusMessage;
+import Messages.ShuffleMessageObject;
 import Messages.StopMessageObject;
 import Messages.VolumeObject;
 import Network.TCPCLIENT;
@@ -36,8 +37,6 @@ import Network.TCPCLIENT;
  * Created by Unknown1 on 7/10/13.
  */
 public class Play_Main extends Fragment implements IListener {
-
-    private static final String SetSHUFFLE = "Shuffle";
 
     private static final String TAG = "Play_Main_Fragment";
 //    private static final String CONNECT = "connect";
@@ -64,7 +63,6 @@ public class Play_Main extends Fragment implements IListener {
         super.onCreateView(inflater, container, null);
 
         final Gson jsonMaker = new Gson();
-//        final PlayMessageObject defaultMessages = new PlayMessageObject();
 
         mainFrag = this;
 
@@ -183,13 +181,11 @@ public class Play_Main extends Fragment implements IListener {
                                 }
         );
 
+        // Handle SeekBar volume events logic
         final VolumeObject volumeObject = new VolumeObject();
-
-        volume.setMax(100);
         volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
 
                 if (progress > _currentVolume) {
                     volumeObject.SetWhichWay("Up");
@@ -197,15 +193,11 @@ public class Play_Main extends Fragment implements IListener {
                 } else if (progress < _currentVolume) {
                     volumeObject.SetWhichWay("Down");
                     _currentVolume = progress;
-
                 }
-
-
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
 
             }
 
@@ -213,13 +205,16 @@ public class Play_Main extends Fragment implements IListener {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int stepsDifferent = 0;
 
+                // If the user changed volume up...
                 if (_currentVolume > _originalVolume) {
                     Log.d("_currentVolume", "" + _currentVolume);
                     Log.d("_originalVolume", "" + _originalVolume);
                     stepsDifferent = _currentVolume - _originalVolume;
                     Log.d("stepsDifferent", "" + stepsDifferent);
                     _originalVolume = _currentVolume;
-                } else if (_currentVolume < _originalVolume) {
+                }
+                // If the user changed volume down...
+                else if (_currentVolume < _originalVolume) {
                     Log.d("_currentVolume", "" + _currentVolume);
                     Log.d("_originalVolume", "" + _originalVolume);
                     stepsDifferent = _originalVolume - _currentVolume;
@@ -230,9 +225,7 @@ public class Play_Main extends Fragment implements IListener {
                 volumeObject.setProgress(stepsDifferent);
 
                 String json = jsonMaker.toJson(volumeObject);
-                if (mTCPCLIENT != null) {
-                    mTCPCLIENT.sendMessage(json);
-                }
+                DispatchToServer(json);
 
             }
         });
@@ -246,9 +239,10 @@ public class Play_Main extends Fragment implements IListener {
                                    {
                                        @Override
                                        public void onClick(View view) {
-                                           if (mTCPCLIENT != null) {
-                                               mTCPCLIENT.sendMessage(SetSHUFFLE);
-                                           }
+                                         if(shuffle.isChecked()){
+                                             String json = jsonMaker.toJson(new ShuffleMessageObject().setIsShuffleOn(true));
+
+                                         }
                                        }
                                    }
         );
