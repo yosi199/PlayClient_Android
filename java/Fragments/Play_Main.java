@@ -15,11 +15,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
-import com.loop_to_infinity.play.PlayClient;
 import com.loop_to_infinity.play.R;
 
 import Interfaces.IListener;
@@ -87,24 +85,6 @@ public class Play_Main extends Fragment implements IListener {
                                                              mTCPCLIENT.RegisterListener(mainFrag);
                                                              String json = jsonMaker.toJson(new DeviceInfo());
                                                              mTCPCLIENT.sendMessage(json);
-
-                                                             // Communicate with the server every 3 seconds to keep alive and get updates
-                                                             new Thread(new Runnable() {
-                                                                 @Override
-                                                                 public void run() {
-                                                                     while (runUpdates) {
-
-                                                                         try {
-                                                                             Thread.sleep(3000);
-                                                                             String json = jsonMaker.toJson(new DeviceInfo());
-                                                                             mTCPCLIENT.sendMessage(json);
-                                                                         } catch (InterruptedException e) {
-                                                                             e.printStackTrace();
-                                                                         }
-                                                                     }
-
-                                                                 }
-                                                             }).run();
 
                                                          } catch (InterruptedException ie) {
                                                              ie.getMessage();
@@ -307,7 +287,7 @@ public class Play_Main extends Fragment implements IListener {
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            Toast.makeText(PlayClient.ctx, "" + values[0], Toast.LENGTH_SHORT).show();
+            // Toast.makeText(PlayClient.ctx, "" + values[0], Toast.LENGTH_SHORT).show();
             tv1.setText(values[0]);
             Log.d("Server", "" + values[0]);
         }
@@ -376,7 +356,7 @@ public class Play_Main extends Fragment implements IListener {
     }
 
     private void DispatchToServer(String json) {
-        Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
 
         if (mTCPCLIENT != null) {
             mTCPCLIENT.sendMessage(json);

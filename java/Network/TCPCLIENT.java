@@ -92,7 +92,6 @@ public class TCPCLIENT implements ISubject {
                         _statusMessageObject = (ServerStatusMessage) obj;
                         // Tell UI to GET info it wants
                         NotifyUpdates();
-
                     }
 
 
@@ -103,8 +102,6 @@ public class TCPCLIENT implements ISubject {
 
                     }
                     serverMessage = null;
-
-
                 }
 
             } catch (Exception e) {
