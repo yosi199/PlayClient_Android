@@ -1,5 +1,7 @@
 package Messages;
 
+import Utilities.Constants;
+
 /**
  * Created by Unknown on 21/06/2014.
  */
@@ -9,6 +11,15 @@ public class ServerStatusMessage {
     private float CurrentVolume = 0;
     private float MaxVolume = 0;
     private float MinVolume = 0;
+    private String PlayerTypeSet = Constants.LocalPlayer;
+
+    public String getPlayerTypeSet() {
+        return PlayerTypeSet;
+    }
+
+    public void setPlayerTypeSet(String playerTypeSet) {
+        PlayerTypeSet = playerTypeSet;
+    }
 
     public Boolean getIsShuffleOn() {
         return IsShuffleOn;
@@ -35,7 +46,6 @@ public class ServerStatusMessage {
     public void setMaxVolume(float maxVolume) {
         this.MaxVolume = maxVolume;
     }
-
 
     public String getMessageType() {
         return messageType;

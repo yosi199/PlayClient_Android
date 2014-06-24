@@ -67,4 +67,9 @@ public class MessageManager {
 
         return obj;
     }
+
+    public enum PlayerType {
+        LocalPlayer,
+        SoundCloud
+    }
 }
