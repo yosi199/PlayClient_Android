@@ -51,7 +51,6 @@ public class Play_Main extends Fragment implements IListener {
     private CheckBox shuffle;
     private int _currentVolume;
     private int _originalVolume;
-    private Boolean runUpdates = true;
 
     private Play_Main mainFrag;
 
@@ -213,16 +212,23 @@ public class Play_Main extends Fragment implements IListener {
         tv1 = (TextView) view.findViewById(R.id.tv1);
         tv1.setText("Connect and start playing");
 
+        final ShuffleMessageObject shuffleMessage = new ShuffleMessageObject();
         shuffle = (CheckBox) view.findViewById(R.id.shuffle);
         shuffle.setOnClickListener(new View.OnClickListener()
 
                                    {
                                        @Override
                                        public void onClick(View view) {
-                                         if(shuffle.isChecked()){
-                                             String json = jsonMaker.toJson(new ShuffleMessageObject().setIsShuffleOn(true));
+                                           if (shuffle.isChecked()) {
+                                               shuffleMessage.setIsShuffleOn(true);
+                                               String json = jsonMaker.toJson(shuffleMessage);
+                                               DispatchToServer(json);
+                                           } else {
+                                               shuffleMessage.setIsShuffleOn(false);
+                                               String json = jsonMaker.toJson(shuffleMessage);
+                                               DispatchToServer(json);
 
-                                         }
+                                           }
                                        }
                                    }
         );
@@ -235,13 +241,10 @@ public class Play_Main extends Fragment implements IListener {
 
         // Get original Volume values
         ServerStatusMessage messageFromServer = mTCPCLIENT.getStatusUpdate();
-        final float minVolume = messageFromServer.getMinVolume();
+        // final float minVolume = messageFromServer.getMinVolume();
         final float maxVolume = messageFromServer.getMaxVolume();
         final float currentVolume = messageFromServer.getCurrentVolume();
 
-        // Manipulate them to fit into seekBar
-        //  final float inveredCurrentVolume = (currentVolume * (-1));
-        // final float invertedMaxVolume = (-1) * (minVolume);
 
         final int maxVolumeFinal = (int) maxVolume;
         final int currentVolumeFinal = (int) currentVolume;
