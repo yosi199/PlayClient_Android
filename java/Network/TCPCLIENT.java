@@ -24,22 +24,18 @@ public class TCPCLIENT implements ISubject {
     // Server connection info
     public static final String SERVERIP = "10.0.0.5";
     public static final int SERVERPORT = 5555;
-
+    public static CountDownLatch mCountDown = new CountDownLatch(1);
     // Server readers/writers
     private boolean mRun = false;
     private PrintWriter out;
     private BufferedReader in;
-
     // Registered listeners to pass messages to UI
     private OnMessageReceived mMessageListener = null;
     private IListener mUpdatesListener;
-
     // Some instance variables
     private String serverMessage;
     private MessageManager messageHandler = null;
     private ServerStatusMessage _statusMessageObject;
-
-    public static CountDownLatch mCountDown = new CountDownLatch(1);
 
 
     public TCPCLIENT(OnMessageReceived listener) {

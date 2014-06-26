@@ -70,6 +70,15 @@ public class Play_Main extends Fragment implements IListener {
         connectButton.setOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View view) {
+
+                                                 // ***** IntentService Way ****** //
+
+                                                 //  Intent intent = new Intent(getActivity(), NetworkService.class);
+                                                 // getActivity().startService(intent);
+
+
+                                                 // ***** AsyncTask Way ****** //
+
                                                  // Disable button until a connection is made
                                                  connectButton.setEnabled(false);
                                                  // Create a server instance and connect
@@ -266,6 +275,32 @@ public class Play_Main extends Fragment implements IListener {
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu, inflater);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.restart:
+                new connectTask().execute("");
+                break;
+
+        }
+
+        return false;
+    }
+
+    private void DispatchToServer(String json) {
+        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+
+        if (mTCPCLIENT != null) {
+            mTCPCLIENT.sendMessage(json);
+        }
+    }
 
     public class connectTask extends AsyncTask<String, String, TCPCLIENT> {
 
@@ -294,26 +329,6 @@ public class Play_Main extends Fragment implements IListener {
             tv1.setText(values[0]);
             Log.d("Server", "" + values[0]);
         }
-    }
-
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        super.onCreateOptionsMenu(menu, inflater);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.restart:
-                new connectTask().execute("");
-                break;
-
-        }
-
-        return false;
     }
 
     /**
@@ -355,14 +370,6 @@ public class Play_Main extends Fragment implements IListener {
                 return Character.toUpperCase(first) + s.substring(1);
             }
 
-        }
-    }
-
-    private void DispatchToServer(String json) {
-        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-
-        if (mTCPCLIENT != null) {
-            mTCPCLIENT.sendMessage(json);
         }
     }
 }
