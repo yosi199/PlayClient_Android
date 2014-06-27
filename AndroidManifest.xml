@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme">
 
         <service
-            android:name="Network.NetworkService"
+            android:name="network.NetworkService"
             android:exported="false" />
         <activity
             android:name="com.loop_to_infinity.play.PlayClient"

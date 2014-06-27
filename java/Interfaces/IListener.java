@@ -5,5 +5,5 @@ package Interfaces;
  */
 public interface IListener {
 
-    public void UpdateInfo();
+    public void UpdateInfo(String whatUpdate);
 }

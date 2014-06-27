@@ -1,7 +1,7 @@
 package Fragments;
 
 import android.app.Fragment;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,15 +20,20 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.loop_to_infinity.play.R;
 
+import java.util.concurrent.TimeUnit;
+
 import Interfaces.IListener;
 import Messages.BackwardMessageObject;
 import Messages.ForwardMessageObject;
+import Messages.MessageManager;
 import Messages.PlayMessageObject;
 import Messages.ServerStatusMessage;
 import Messages.ShuffleMessageObject;
+import Messages.Song;
 import Messages.StopMessageObject;
 import Messages.VolumeObject;
-import Network.TCPCLIENT;
+import network.NetworkService;
+import network.TCPCLIENT;
 
 
 /**
@@ -37,11 +42,11 @@ import Network.TCPCLIENT;
 public class Play_Main extends Fragment implements IListener {
 
     private static final String TAG = "Play_Main_Fragment";
-//    private static final String CONNECT = "connect";
+
+    public static String MessengerObject = "Messenger";
 
     // Views and fields
     private TextView tv1;
-    private TCPCLIENT mTCPCLIENT = null;
     private Button connectButton;
     private Button play;
     private Button back;
@@ -49,70 +54,58 @@ public class Play_Main extends Fragment implements IListener {
     private Button stop;
     private SeekBar volume;
     private CheckBox shuffle;
+
+    // Object Instances
+    private Play_Main mainFrag;
+    private MessageManager messageManager;
+
+    // Fields
     private int _currentVolume;
     private int _originalVolume;
-
-    private Play_Main mainFrag;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.main_ui_frame, container, false);
         super.onCreateView(inflater, container, null);
 
+        mainFrag = this;
         final Gson jsonMaker = new Gson();
 
-        mainFrag = this;
+        messageManager = MessageManager.Instance();
+        messageManager.RegisterListener(mainFrag);
+
 
         volume = (SeekBar) view.findViewById(R.id.seekBar);
         volume.setVisibility(View.INVISIBLE);
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
         connectButton.setOnClickListener(new View.OnClickListener() {
-                                             @Override
-                                             public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
 
-                                                 // ***** IntentService Way ****** //
+                // ***** IntentService Way ****** //
 
-                                                 //  Intent intent = new Intent(getActivity(), NetworkService.class);
-                                                 // getActivity().startService(intent);
+                Intent intent = new Intent(getActivity(), NetworkService.class);
+                getActivity().startService(intent);
 
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Once client is connected, give the server some info about client
+                            TCPCLIENT.mCountDown.await(3000, TimeUnit.MILLISECONDS);
 
-                                                 // ***** AsyncTask Way ****** //
+                            String json = jsonMaker.toJson(new DeviceInfo());
+                            DispatchToServer(json);
+                        } catch (InterruptedException ie) {
+                            ie.getMessage();
+                        }
+                    }
+                }).run();
 
-                                                 // Disable button until a connection is made
-                                                 connectButton.setEnabled(false);
-                                                 // Create a server instance and connect
-                                                 new connectTask().execute("");
-                                                 // Wait until the client is connected and then release the button
-                                                 new Thread(new Runnable() {
-                                                     @Override
-                                                     public void run() {
-                                                         try {
-                                                             // Once client is connected, give the server some info about client
-                                                             TCPCLIENT.mCountDown.await();
-                                                             mTCPCLIENT.RegisterListener(mainFrag);
-                                                             String json = jsonMaker.toJson(new DeviceInfo());
-                                                             mTCPCLIENT.sendMessage(json);
+            }
+        });
 
-                                                         } catch (InterruptedException ie) {
-                                                             ie.getMessage();
-                                                         }
-
-
-                                                         // when a connection is made, enable the button again
-                                                         connectButton.post(new Runnable() {
-                                                             @Override
-                                                             public void run() {
-                                                                 connectButton.setEnabled(true);
-
-                                                             }
-                                                         });
-
-                                                     }
-                                                 }).start();
-                                             }
-                                         }
-        );
 
         play = (Button) view.findViewById(R.id.playBT);
         play.setOnClickListener(new View.OnClickListener()
@@ -133,10 +126,10 @@ public class Play_Main extends Fragment implements IListener {
                                 {
                                     @Override
                                     public void onClick(View view) {
-                                        if (mTCPCLIENT != null) {
-                                            String json = jsonMaker.toJson(new BackwardMessageObject());
-                                            DispatchToServer(json);
-                                        }
+
+                                        String json = jsonMaker.toJson(new BackwardMessageObject());
+                                        DispatchToServer(json);
+
                                     }
                                 }
         );
@@ -147,10 +140,10 @@ public class Play_Main extends Fragment implements IListener {
                                    {
                                        @Override
                                        public void onClick(View view) {
-                                           if (mTCPCLIENT != null) {
-                                               String json = jsonMaker.toJson(new ForwardMessageObject());
-                                               DispatchToServer(json);
-                                           }
+
+                                           String json = jsonMaker.toJson(new ForwardMessageObject());
+                                           DispatchToServer(json);
+
 
                                        }
 
@@ -246,14 +239,48 @@ public class Play_Main extends Fragment implements IListener {
     }
 
     @Override
-    public void UpdateInfo() {
+    public void UpdateInfo(String whatUpdate) {
 
-        // Get original Volume values
-        ServerStatusMessage messageFromServer = mTCPCLIENT.getStatusUpdate();
-        // final float minVolume = messageFromServer.getMinVolume();
+        switch (whatUpdate) {
+
+            case MessageManager.SONG:
+                getSongUpdate();
+                break;
+            case MessageManager.STATUS:
+                getStatusUpdates();
+        }
+    }
+
+    private void getSongUpdate() {
+        final Song song = messageManager.getSongObj();
+
+        final String artistName = song.getArtistName();
+        final String title = song.getTitleName();
+
+        tv1.post(new Runnable() {
+            @Override
+            public void run() {
+                tv1.setText(artistName + " - " + title);
+            }
+        });
+
+
+    }
+
+    /**
+    Gets information about values set at the server side
+     */
+    private void getStatusUpdates() {
+
+
+        ServerStatusMessage messageFromServer = messageManager.getServerStatusMessage_Obj();
+
+        // Get shuffle value from server
+        final boolean shuffleOnS = messageFromServer.getIsShuffleOn();
+
+        // Get original Volume values from server
         final float maxVolume = messageFromServer.getMaxVolume();
         final float currentVolume = messageFromServer.getCurrentVolume();
-
 
         final int maxVolumeFinal = (int) maxVolume;
         final int currentVolumeFinal = (int) currentVolume;
@@ -261,6 +288,8 @@ public class Play_Main extends Fragment implements IListener {
         volume.post(new Runnable() {
             @Override
             public void run() {
+
+                shuffle.setChecked(shuffleOnS);
 
                 _currentVolume = currentVolumeFinal;
                 _originalVolume = currentVolumeFinal;
@@ -271,9 +300,20 @@ public class Play_Main extends Fragment implements IListener {
 
             }
         });
-
-
     }
+
+    /**
+     * Sends a message back to server
+     * @param json - the message Object to send as a JSON file
+     */
+    private void DispatchToServer(String json) {
+        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+
+        if (messageManager != null && TCPCLIENT.IsConnected) {
+            messageManager.sendMessage(json);
+        }
+    }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -286,49 +326,12 @@ public class Play_Main extends Fragment implements IListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.restart:
-                new connectTask().execute("");
+
                 break;
 
         }
 
         return false;
-    }
-
-    private void DispatchToServer(String json) {
-        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-
-        if (mTCPCLIENT != null) {
-            mTCPCLIENT.sendMessage(json);
-        }
-    }
-
-    public class connectTask extends AsyncTask<String, String, TCPCLIENT> {
-
-        @Override
-        protected TCPCLIENT doInBackground(String... message) {
-
-            //we create a TCPClient object and
-            mTCPCLIENT = new TCPCLIENT(new TCPCLIENT.OnMessageReceived() {
-                @Override
-                //here the messageReceived method is implemented
-                public void messageReceived(String message) {
-                    //this method calls the onProgressUpdate
-                    publishProgress(message);
-
-                }
-            });
-            mTCPCLIENT.run();
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            // Toast.makeText(PlayClient.ctx, "" + values[0], Toast.LENGTH_SHORT).show();
-            tv1.setText(values[0]);
-            Log.d("Server", "" + values[0]);
-        }
     }
 
     /**
@@ -373,3 +376,4 @@ public class Play_Main extends Fragment implements IListener {
         }
     }
 }
+

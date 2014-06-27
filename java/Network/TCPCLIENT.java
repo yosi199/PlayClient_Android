@@ -1,4 +1,4 @@
-package Network;
+package network;
 
 import android.util.Log;
 
@@ -11,36 +11,33 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
-import Interfaces.IListener;
-import Interfaces.ISubject;
 import Messages.MessageManager;
-import Messages.ServerStatusMessage;
 
 /**
  * Created by Unknown1 on 7/12/13.
  */
-public class TCPCLIENT implements ISubject {
+public class TCPCLIENT {
 
     // Server connection info
     public static final String SERVERIP = "10.0.0.5";
     public static final int SERVERPORT = 5555;
+    public static Boolean IsConnected = false;
     public static CountDownLatch mCountDown = new CountDownLatch(1);
     // Server readers/writers
     private boolean mRun = false;
     private PrintWriter out;
     private BufferedReader in;
-    // Registered listeners to pass messages to UI
-    private OnMessageReceived mMessageListener = null;
-    private IListener mUpdatesListener;
+
     // Some instance variables
     private String serverMessage;
     private MessageManager messageHandler = null;
-    private ServerStatusMessage _statusMessageObject;
 
 
-    public TCPCLIENT(OnMessageReceived listener) {
-        mMessageListener = listener;
+    public TCPCLIENT() {
 
+        // get the messageHandler instance and pass the message
+        messageHandler = MessageManager.Instance();
+        messageHandler.registerTcpClient(this);
     }
 
     public void sendMessage(String message) {
@@ -67,7 +64,7 @@ public class TCPCLIENT implements ISubject {
 
             if (socket.isConnected()) {
                 Log.e("TCP Client", "Connected!");
-
+                IsConnected = true;
             }
 
 
@@ -80,23 +77,8 @@ public class TCPCLIENT implements ISubject {
                 while (mRun) {
                     serverMessage = in.readLine();
                     Log.d("dasd", serverMessage);
-                    messageHandler = MessageManager.Instance();
-                    Object obj = messageHandler.figureMessageType(serverMessage, mMessageListener);
 
-                    // Check to see if message replied with a status update
-                    if (obj instanceof ServerStatusMessage) {
-                        _statusMessageObject = (ServerStatusMessage) obj;
-                        // Tell UI to GET info it wants
-                        NotifyUpdates();
-                    }
-
-
-                    if (serverMessage != null && mMessageListener != null) {
-                        //call the method messageReceived from MyActivity class
-                        //      mMessageListener.messageReceived(serverMessage);
-
-
-                    }
+                    messageHandler.figureMessageType(serverMessage);
                     serverMessage = null;
                 }
 
@@ -121,24 +103,5 @@ public class TCPCLIENT implements ISubject {
         }
     }
 
-    // Returns the server status updates object so UI can extract data from.
-    public ServerStatusMessage getStatusUpdate() {
-        return _statusMessageObject;
-    }
-
-    @Override
-    public void RegisterListener(IListener listener) {
-        mUpdatesListener = listener;
-    }
-
-    @Override
-    public void NotifyUpdates() {
-        mUpdatesListener.UpdateInfo();
-
-    }
-
-    public interface OnMessageReceived {
-        public void messageReceived(String message);
-    }
 
 }

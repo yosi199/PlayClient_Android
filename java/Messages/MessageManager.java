@@ -7,16 +7,23 @@ import com.google.gson.GsonBuilder;
 
 import java.util.Map;
 
-import Network.TCPCLIENT;
+import Interfaces.IListener;
+import Interfaces.ISubject;
+import network.TCPCLIENT;
 
 /**
  * Created by Unknown on 15/06/2014.
  */
-public class MessageManager {
+public class MessageManager implements ISubject {
 
+    public static final String STATUS = "Status";
+    public static final String SONG = "song";
     private static MessageManager instance = null;
-    private TCPCLIENT.OnMessageReceived mMessageListener = null;
     private static String TAG = "MessageManager";
+    private IListener mPlayMain = null;
+    private TCPCLIENT mTcpClient = null;
+    private ServerStatusMessage serverStatusMessage_Obj;
+    private Song songObj;
 
 
     private MessageManager() {
@@ -32,9 +39,17 @@ public class MessageManager {
 
     }
 
-    public Object figureMessageType(String message, TCPCLIENT.OnMessageReceived mMessageListener) {
+    public void sendMessage(String msg) {
+        if (TCPCLIENT.IsConnected) {
+            mTcpClient.sendMessage(msg);
+        }
+    }
 
-        Object obj = null;
+    public void figureMessageType(String message) {
+
+        // reset objects
+        songObj = null;
+        serverStatusMessage_Obj = null;
 
         if (message.length() > 0) {
 
@@ -43,29 +58,59 @@ public class MessageManager {
 
             switch (type) {
 
-                case "song":
+                case SONG:
                     try {
                         Gson gson = new GsonBuilder().create();
-                        Song song = gson.fromJson(message, Song.class);
-                        mMessageListener.messageReceived(song.getArtistName() + " - " + song.getTitleName());
-                        obj = song;
+                        songObj = gson.fromJson(message, Song.class);
+                        NotifyUpdates(SONG);
                     } catch (Exception e) {
                         Log.d(TAG, e.getMessage());
                     }
                     break;
 
-                case "Status":
+                case STATUS:
                     Gson gson = new GsonBuilder().create();
-                    ServerStatusMessage statusMessage = gson.fromJson(message, ServerStatusMessage.class);
-                    obj = statusMessage;
+                    serverStatusMessage_Obj = gson.fromJson(message, ServerStatusMessage.class);
+                    NotifyUpdates(STATUS);
                     break;
                 default:
-                    obj = null;
+                    break;
             }
 
         }
 
-        return obj;
+    }
+
+    public void registerTcpClient(TCPCLIENT client) {
+        mTcpClient = client;
+    }
+
+    /**
+     * Implementations of Observer pattern
+     */
+
+    @Override
+    public void RegisterListener(IListener listener) {
+        mPlayMain = listener;
+    }
+
+    @Override
+    public void NotifyUpdates(String what) {
+        mPlayMain.UpdateInfo(what);
+    }
+
+    /**
+     * A getter for a ServerStatus message type
+     */
+    public ServerStatusMessage getServerStatusMessage_Obj() {
+        return serverStatusMessage_Obj;
+    }
+
+    /**
+     * A getter for a Song message type
+     */
+    public Song getSongObj() {
+        return songObj;
     }
 
     public enum PlayerType {

@@ -7,5 +7,5 @@ public interface ISubject {
 
     public void RegisterListener(IListener listener);
 
-    public void NotifyUpdates();
+    public void NotifyUpdates(String what);
 }
