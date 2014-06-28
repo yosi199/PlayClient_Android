@@ -2,6 +2,7 @@ package Fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,6 +40,7 @@ public class Play_Main extends Fragment implements IListener {
     private static final String TAG = "Play_Main_Fragment";
     public static CountDownLatch mCountDown = new CountDownLatch(1);
 
+    Typeface roboto;
 
     // Views and fields
     private TextView tv1;
@@ -61,6 +63,9 @@ public class Play_Main extends Fragment implements IListener {
         mainFrag = this;
         final Gson jsonMaker = new Gson();
 
+        roboto = Typeface.createFromAsset(getActivity().getAssets(), "fonts/robotot.ttf");
+
+
         messageManager = MessageManager.Instance();
         messageManager.RegisterListener(mainFrag);
 
@@ -72,8 +77,6 @@ public class Play_Main extends Fragment implements IListener {
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
 
                 new Thread(new Runnable() {
                     @Override
@@ -149,8 +152,8 @@ public class Play_Main extends Fragment implements IListener {
         });
 
         tv1 = (TextView) view.findViewById(R.id.tv1);
+        tv1.setTypeface(roboto);
         tv1.setText("Connect and start playing");
-
 
 
         return view;
@@ -207,7 +210,7 @@ public class Play_Main extends Fragment implements IListener {
             @Override
             public void run() {
 
-          //      shuffle.setChecked(shuffleOnS);
+                //      shuffle.setChecked(shuffleOnS);
 
                 _currentVolume = currentVolumeFinal;
                 _originalVolume = currentVolumeFinal;
@@ -227,14 +230,14 @@ public class Play_Main extends Fragment implements IListener {
      */
     private void DispatchToServer(final String json) {
         //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-    new Thread(new Runnable() {
-        @Override
-        public void run() {
-            if (messageManager != null && TCPCLIENT.IsConnected) {
-                messageManager.sendMessage(json);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (messageManager != null && TCPCLIENT.IsConnected) {
+                    messageManager.sendMessage(json);
+                }
             }
-        }
-    }).start();
+        }).start();
 
     }
 

@@ -11,16 +11,7 @@
 
 
 
-    <TextView
-        android:id="@+id/tv1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
-        android:gravity="center_horizontal"
-        android:padding="15dp"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+
 
 
 
@@ -44,6 +35,25 @@
         android:drawableBottom="@android:drawable/presence_online"
         android:text="Connect" />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:src="@android:drawable/ic_media_play" />
+
+    <TextView
+        android:id="@+id/tv1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:padding="15dp"
+        android:textSize="30dp" />
 
 
 </RelativeLayout>
