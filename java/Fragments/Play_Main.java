@@ -1,6 +1,8 @@
 package Fragments;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -72,6 +74,7 @@ public class Play_Main extends Fragment implements IListener {
 
         volume = (SeekBar) view.findViewById(R.id.seekBar);
         volume.setVisibility(View.INVISIBLE);
+        volume.setAlpha(0f);
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
         connectButton.setTypeface(roboto);
@@ -89,10 +92,27 @@ public class Play_Main extends Fragment implements IListener {
                             getActivity().startService(intent);
 
                             // Once client is connected, give the server some info about client
-                            mCountDown.await(10000, TimeUnit.MILLISECONDS);
+                            mCountDown.await(2000, TimeUnit.MILLISECONDS);
 
                             String json = jsonMaker.toJson(new DeviceInfo());
                             DispatchToServer(json);
+
+                            MediaControlsComponent mdc = new MediaControlsComponent();
+
+                            FragmentManager fm = getFragmentManager();
+                            FragmentTransaction ft = fm.beginTransaction();
+                            ft.setCustomAnimations(R.animator.fade_in, android.R.animator.fade_out);
+                            ft.add(R.id.mediaControllerFrame, mdc);
+                            ft.commit();
+                            volume.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    volume.setVisibility(View.VISIBLE);
+                                }
+                            });
+
+                            volume.animate().alpha(1f).setDuration(1000).setListener(null);
+
                         } catch (Exception ie) {
                             ie.getMessage();
                         }
@@ -218,7 +238,6 @@ public class Play_Main extends Fragment implements IListener {
 
                 volume.setMax(maxVolumeFinal);
                 volume.setProgress(currentVolumeFinal);
-                volume.setVisibility(View.VISIBLE);
 
             }
         });

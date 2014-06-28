@@ -28,8 +28,6 @@ public class PlayClient extends Activity {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         ft.add(R.id.frameContainer, main, "main");
-
-        ft.add(R.id.mediaControllerFrame, mdc, "mediaControls");
         ft.commit();
 
 
