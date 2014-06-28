@@ -41,6 +41,8 @@ public class TCPCLIENT {
 
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
+            Log.d("SendFromServer", message);
+
             out.println(message + "<EOF>");
             out.flush();
         }

@@ -26,14 +26,16 @@
 
     <Button
         android:id="@+id/connectBT"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/seekBar"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
         android:background="@android:color/transparent"
-        android:drawableBottom="@android:drawable/presence_online"
-        android:text="Connect" />
+        android:drawableLeft="@android:drawable/presence_online"
+        android:drawablePadding="10dp"
+        android:text="Connect"
+        android:textSize="30dp" />
 
     <ImageView
         android:id="@+id/imageView"

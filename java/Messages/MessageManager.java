@@ -41,6 +41,8 @@ public class MessageManager implements ISubject {
 
     public void sendMessage(String msg) {
         if (TCPCLIENT.IsConnected) {
+            Log.d("SentToServer", "Sent");
+
             mTcpClient.sendMessage(msg);
         }
     }

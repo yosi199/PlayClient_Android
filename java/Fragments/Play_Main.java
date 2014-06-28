@@ -74,6 +74,7 @@ public class Play_Main extends Fragment implements IListener {
         volume.setVisibility(View.INVISIBLE);
 
         connectButton = (Button) view.findViewById(R.id.connectBT);
+        connectButton.setTypeface(roboto);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

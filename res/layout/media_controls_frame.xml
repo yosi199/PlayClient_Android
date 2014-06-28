@@ -15,6 +15,7 @@
         android:layout_marginRight="25dp"
         android:checked="false"
         android:text="Shuffle"
+
         android:textColor="@android:color/white" />
 
 

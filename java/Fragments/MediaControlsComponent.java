@@ -1,7 +1,9 @@
 package Fragments;
 
 import android.app.Fragment;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +32,16 @@ public class MediaControlsComponent extends Fragment {
 
     private MessageManager messageManager;
 
+    private Typeface roboto;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.media_controls_frame, container, false);
         super.onCreateView(inflater, container, null);
+
+        roboto = Typeface.createFromAsset(getActivity().getAssets(), "fonts/robotot.ttf");
 
         final Gson jsonMaker = new Gson();
         messageManager = MessageManager.Instance();
@@ -85,6 +91,7 @@ public class MediaControlsComponent extends Fragment {
 
         final ShuffleMessageObject shuffleMessage = new ShuffleMessageObject();
         shuffle = (CheckBox) view.findViewById(R.id.shuffle);
+        shuffle.setTypeface(roboto);
         shuffle.setOnClickListener(new View.OnClickListener()
 
                                    {
@@ -115,6 +122,7 @@ public class MediaControlsComponent extends Fragment {
         //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
 
         if (messageManager != null && TCPCLIENT.IsConnected) {
+            Log.d("DispatchToServer", "Dispatched");
             messageManager.sendMessage(json);
         }
     }
