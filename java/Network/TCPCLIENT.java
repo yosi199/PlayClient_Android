@@ -64,6 +64,7 @@ public class TCPCLIENT {
             if (socket.isConnected()) {
                 Log.e("TCP Client", "Connected!");
                 IsConnected = true;
+                messageHandler.registerTcpClient(this);
             }
 
 

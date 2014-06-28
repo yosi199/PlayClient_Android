@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -45,7 +44,6 @@ public class Play_Main extends Fragment implements IListener {
     private TextView tv1;
     private Button connectButton;
     private SeekBar volume;
-    private CheckBox shuffle;
 
     // Object Instances
     private Play_Main mainFrag;
@@ -209,7 +207,7 @@ public class Play_Main extends Fragment implements IListener {
             @Override
             public void run() {
 
-                shuffle.setChecked(shuffleOnS);
+          //      shuffle.setChecked(shuffleOnS);
 
                 _currentVolume = currentVolumeFinal;
                 _originalVolume = currentVolumeFinal;
