@@ -9,8 +9,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.CountDownLatch;
 
+import Fragments.Play_Main;
 import Messages.MessageManager;
 
 /**
@@ -22,7 +22,6 @@ public class TCPCLIENT {
     public static final String SERVERIP = "10.0.0.5";
     public static final int SERVERPORT = 5555;
     public static Boolean IsConnected = false;
-    public static CountDownLatch mCountDown = new CountDownLatch(1);
     // Server readers/writers
     private boolean mRun = false;
     private PrintWriter out;
@@ -72,7 +71,7 @@ public class TCPCLIENT {
 
                 out = new PrintWriter(socket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                mCountDown.countDown();
+                Play_Main.mCountDown.countDown();
 
                 while (mRun) {
                     serverMessage = in.readLine();

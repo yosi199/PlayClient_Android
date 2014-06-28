@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import Fragments.MediaControlsComponent;
 import Fragments.Play_Main;
 
 public class PlayClient extends Activity {
@@ -22,10 +23,13 @@ public class PlayClient extends Activity {
         ctx = this;
 
         main = new Play_Main();
+        MediaControlsComponent mdc = new MediaControlsComponent();
 
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         ft.add(R.id.frameContainer, main, "main");
+
+        ft.add(R.id.mediaControllerFrame, mdc, "mediaControls");
         ft.commit();
 
 

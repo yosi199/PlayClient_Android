@@ -19,8 +19,14 @@ public class NetworkService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         Log.d(TAG, "starting the service");
-        TCPCLIENT client = new TCPCLIENT();
-        client.run();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                TCPCLIENT client = new TCPCLIENT();
+                client.run();
+            }
+        }).start();
+
 
 
     }

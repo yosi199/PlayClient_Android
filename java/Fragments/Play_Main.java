@@ -20,17 +20,13 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.loop_to_infinity.play.R;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import Interfaces.IListener;
-import Messages.BackwardMessageObject;
-import Messages.ForwardMessageObject;
 import Messages.MessageManager;
-import Messages.PlayMessageObject;
 import Messages.ServerStatusMessage;
-import Messages.ShuffleMessageObject;
 import Messages.Song;
-import Messages.StopMessageObject;
 import Messages.VolumeObject;
 import network.NetworkService;
 import network.TCPCLIENT;
@@ -42,16 +38,12 @@ import network.TCPCLIENT;
 public class Play_Main extends Fragment implements IListener {
 
     private static final String TAG = "Play_Main_Fragment";
+    public static CountDownLatch mCountDown = new CountDownLatch(1);
 
-    public static String MessengerObject = "Messenger";
 
     // Views and fields
     private TextView tv1;
     private Button connectButton;
-    private Button play;
-    private Button back;
-    private Button forward;
-    private Button stop;
     private SeekBar volume;
     private CheckBox shuffle;
 
@@ -83,84 +75,31 @@ public class Play_Main extends Fragment implements IListener {
             @Override
             public void onClick(View view) {
 
-                // ***** IntentService Way ****** //
 
-                Intent intent = new Intent(getActivity(), NetworkService.class);
-                getActivity().startService(intent);
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
+
+                            // ***** IntentService Way ****** //
+                            Intent intent = new Intent(getActivity(), NetworkService.class);
+                            getActivity().startService(intent);
+
                             // Once client is connected, give the server some info about client
-                            TCPCLIENT.mCountDown.await(3000, TimeUnit.MILLISECONDS);
+                            mCountDown.await(10000, TimeUnit.MILLISECONDS);
 
                             String json = jsonMaker.toJson(new DeviceInfo());
                             DispatchToServer(json);
-                        } catch (InterruptedException ie) {
+                        } catch (Exception ie) {
                             ie.getMessage();
                         }
                     }
-                }).run();
+                }).start();
 
             }
         });
 
-
-        play = (Button) view.findViewById(R.id.playBT);
-        play.setOnClickListener(new View.OnClickListener()
-
-                                {
-                                    @Override
-                                    public void onClick(View view) {
-
-                                        String json = jsonMaker.toJson(new PlayMessageObject());
-                                        DispatchToServer(json);
-                                    }
-                                }
-        );
-
-        back = (Button) view.findViewById(R.id.backBT);
-        back.setOnClickListener(new View.OnClickListener()
-
-                                {
-                                    @Override
-                                    public void onClick(View view) {
-
-                                        String json = jsonMaker.toJson(new BackwardMessageObject());
-                                        DispatchToServer(json);
-
-                                    }
-                                }
-        );
-
-        forward = (Button) view.findViewById(R.id.forwardBT);
-        forward.setOnClickListener(new View.OnClickListener()
-
-                                   {
-                                       @Override
-                                       public void onClick(View view) {
-
-                                           String json = jsonMaker.toJson(new ForwardMessageObject());
-                                           DispatchToServer(json);
-
-
-                                       }
-
-                                   }
-        );
-
-        stop = (Button) view.findViewById(R.id.stopBT);
-        stop.setOnClickListener(new View.OnClickListener()
-
-                                {
-                                    @Override
-                                    public void onClick(View view) {
-                                        String json = jsonMaker.toJson(new StopMessageObject());
-                                        DispatchToServer(json);
-                                    }
-                                }
-        );
 
         // Handle SeekBar volume events logic
         final VolumeObject volumeObject = new VolumeObject();
@@ -214,26 +153,7 @@ public class Play_Main extends Fragment implements IListener {
         tv1 = (TextView) view.findViewById(R.id.tv1);
         tv1.setText("Connect and start playing");
 
-        final ShuffleMessageObject shuffleMessage = new ShuffleMessageObject();
-        shuffle = (CheckBox) view.findViewById(R.id.shuffle);
-        shuffle.setOnClickListener(new View.OnClickListener()
 
-                                   {
-                                       @Override
-                                       public void onClick(View view) {
-                                           if (shuffle.isChecked()) {
-                                               shuffleMessage.setIsShuffleOn(true);
-                                               String json = jsonMaker.toJson(shuffleMessage);
-                                               DispatchToServer(json);
-                                           } else {
-                                               shuffleMessage.setIsShuffleOn(false);
-                                               String json = jsonMaker.toJson(shuffleMessage);
-                                               DispatchToServer(json);
-
-                                           }
-                                       }
-                                   }
-        );
 
         return view;
     }
@@ -268,7 +188,7 @@ public class Play_Main extends Fragment implements IListener {
     }
 
     /**
-    Gets information about values set at the server side
+     * Gets information about values set at the server side
      */
     private void getStatusUpdates() {
 
@@ -304,14 +224,20 @@ public class Play_Main extends Fragment implements IListener {
 
     /**
      * Sends a message back to server
+     *
      * @param json - the message Object to send as a JSON file
      */
-    private void DispatchToServer(String json) {
+    private void DispatchToServer(final String json) {
         //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
-
-        if (messageManager != null && TCPCLIENT.IsConnected) {
-            messageManager.sendMessage(json);
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            if (messageManager != null && TCPCLIENT.IsConnected) {
+                messageManager.sendMessage(json);
+            }
         }
+    }).start();
+
     }
 
 
