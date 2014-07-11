@@ -1,55 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:gravity="center"
-    android:orientation="horizontal"
-    android:weightSum="100">
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/lighter"
+    android:orientation="vertical">
 
-    <CheckBox
-        android:id="@+id/shuffle"
-        android:layout_width="wrap_content"
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginRight="25dp"
-        android:checked="false"
-        android:text="Shuffle"
-
-        android:textColor="@android:color/white" />
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:indeterminate="false" />
 
 
-    <Button
-        android:id="@+id/rewind"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@android:drawable/ic_media_previous"
-        android:drawablePadding="20dp" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="100">
 
-    <Button
-        android:id="@+id/play_pause"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
 
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@android:drawable/ic_media_play"
-        android:drawablePadding="20dp" />
-    <Button
-        android:id="@+id/forward"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@android:drawable/ic_media_next"
-        android:drawablePadding="20dp" />
+        <CheckBox
+            android:id="@+id/shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="25dp"
+            android:checked="false"
+            android:text="Shuffle"
 
+            android:textColor="@android:color/white" />
+
+
+        <Button
+            android:id="@+id/rewind"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:drawable/ic_media_previous"
+            android:drawablePadding="20dp" />
+
+        <Button
+            android:id="@+id/play_pause"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:drawable/ic_media_play"
+            android:drawablePadding="20dp" />
+
+        <Button
+            android:id="@+id/forward"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:drawable/ic_media_next"
+            android:drawablePadding="20dp" />
+
+    </LinearLayout>
 </LinearLayout>

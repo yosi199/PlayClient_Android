@@ -2,6 +2,8 @@ package network;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +13,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import Fragments.Play_Main;
+import Messages.KillAndRestartMessageObject;
 import Messages.MessageManager;
 
 /**
@@ -41,15 +44,29 @@ public class TCPCLIENT {
 
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
-            Log.d("SendFromServer", message);
 
-            out.println(message + "<EOF>");
-            out.flush();
+            // inform the server and kill the connetion
+            if (message.contains("CloseSelf")) {
+                Gson gson = new Gson();
+                String killJSON = gson.toJson(new KillAndRestartMessageObject());
+
+                out.println(killJSON + "<EOF>");
+                out.flush();
+
+                stopClient();
+
+            } else {
+                Log.d("SendFromServer", message);
+
+                out.println(message + "<EOF>");
+                out.flush();
+            }
         }
     }
 
     public void stopClient() {
         mRun = false;
+        IsConnected = false;
     }
 
     public void run() {
@@ -76,6 +93,7 @@ public class TCPCLIENT {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 Play_Main.mCountDown.countDown();
 
+
                 while (mRun) {
                     serverMessage = in.readLine();
                     Log.d("dasd", serverMessage);
@@ -99,8 +117,10 @@ public class TCPCLIENT {
 
 
         } catch (UnknownHostException e) {
+            IsConnected = false;
             e.printStackTrace();
         } catch (IOException e) {
+            IsConnected = false;
             e.printStackTrace();
         }
     }

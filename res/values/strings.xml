@@ -3,6 +3,18 @@
 
     <string name="app_name">PlayClient</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="pull_to_connect">Pull to connect</string>
+    <string name="connected">Connected.</string>
+    <string name="connecting">Connecting...</string>
+    <string name="disconnected">Disconnected.</string>
+    <string name="failed_to_connect">Failed, Try again!</string>
+    <string-array name="nav_drawer">
+
+        <item>"Local Player"</item>
+        <item>"Sound Cloud"</item>
+    </string-array>
+
+    <color name="darker">#383737</color>
+    <color name="lighter">#324b42</color>
 
 </resources>

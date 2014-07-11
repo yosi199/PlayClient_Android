@@ -13,6 +13,7 @@ public class Song {
     private String messageType;
 
     public Song() {
+
     }
 
     public String getArtistName() {

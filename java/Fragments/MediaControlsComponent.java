@@ -9,31 +9,39 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
 
 import com.google.gson.Gson;
 import com.loop_to_infinity.play.R;
 
+import Interfaces.IListener;
 import Messages.BackwardMessageObject;
 import Messages.ForwardMessageObject;
 import Messages.MessageManager;
 import Messages.PlayMessageObject;
+import Messages.ServerStatusMessage;
 import Messages.ShuffleMessageObject;
+import Messages.VolumeObject;
 import network.TCPCLIENT;
 
 /**
  * Created by Unknown on 28/06/2014.
  */
-public class MediaControlsComponent extends Fragment {
+public class MediaControlsComponent extends Fragment implements IListener {
 
-    Button play;
-    Button back;
-    Button forward;
-    CheckBox shuffle;
+    private Button play;
+    private Button back;
+    private Button forward;
+    private CheckBox shuffle;
+    private SeekBar volume;
+
+    private String TAG = "mediaContols";
 
     private MessageManager messageManager;
 
     private Typeface roboto;
-
+    private int _currentVolume;
+    private int _originalVolume;
 
 
     @Override
@@ -45,6 +53,7 @@ public class MediaControlsComponent extends Fragment {
 
         final Gson jsonMaker = new Gson();
         messageManager = MessageManager.Instance();
+        messageManager.RegisterListener(this);
 
         play = (Button) view.findViewById(R.id.play_pause);
         play.setOnClickListener(new View.OnClickListener()
@@ -110,6 +119,61 @@ public class MediaControlsComponent extends Fragment {
                                        }
                                    }
         );
+
+        volume = (SeekBar) view.findViewById(R.id.seekBar);
+
+        // Handle SeekBar volume events logic
+        final VolumeObject volumeObject = new VolumeObject();
+        volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+
+                                          {
+                                              @Override
+                                              public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                                                  if (progress > _currentVolume) {
+                                                      volumeObject.SetWhichWay("Up");
+                                                      _currentVolume = progress;
+                                                  } else if (progress < _currentVolume) {
+                                                      volumeObject.SetWhichWay("Down");
+                                                      _currentVolume = progress;
+                                                  }
+                                              }
+
+                                              @Override
+                                              public void onStartTrackingTouch(SeekBar seekBar) {
+
+                                              }
+
+                                              @Override
+                                              public void onStopTrackingTouch(SeekBar seekBar) {
+                                                  int stepsDifferent = 0;
+
+                                                  // If the user changed volume up...
+                                                  if (_currentVolume > _originalVolume) {
+                                                      Log.d("_currentVolume", "" + _currentVolume);
+                                                      Log.d("_originalVolume", "" + _originalVolume);
+                                                      stepsDifferent = _currentVolume - _originalVolume;
+                                                      Log.d("stepsDifferent", "" + stepsDifferent);
+                                                      _originalVolume = _currentVolume;
+                                                  }
+                                                  // If the user changed volume down...
+                                                  else if (_currentVolume < _originalVolume) {
+                                                      Log.d("_currentVolume", "" + _currentVolume);
+                                                      Log.d("_originalVolume", "" + _originalVolume);
+                                                      stepsDifferent = _originalVolume - _currentVolume;
+                                                      Log.d("stepsDifferent", "" + stepsDifferent);
+                                                      _originalVolume = _currentVolume;
+                                                  }
+
+                                                  volumeObject.setProgress(stepsDifferent);
+
+                                                  String json = jsonMaker.toJson(volumeObject);
+                                                  DispatchToServer(json);
+
+                                              }
+                                          }
+        );
+
         return view;
     }
 
@@ -126,4 +190,52 @@ public class MediaControlsComponent extends Fragment {
             messageManager.sendMessage(json);
         }
     }
+
+    @Override
+    public void UpdateInfo(String whatUpdate) {
+
+        final String what = whatUpdate;
+        final ServerStatusMessage messageFromServer = messageManager.getServerStatusMessage_Obj();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                switch (what) {
+                    case MessageManager.STATUS:
+
+
+                        // Get shuffle value from server
+                        final boolean shuffleOnS = messageFromServer.getIsShuffleOn();
+
+                        // Get original Volume values from server
+                        final float maxVolume = messageFromServer.getMaxVolume();
+                        final float currentVolume = messageFromServer.getCurrentVolume();
+
+                        final int maxVolumeFinal = (int) maxVolume;
+                        final int currentVolumeFinal = (int) currentVolume;
+
+                        volume.post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                //      shuffle.setChecked(shuffleOnS);
+
+                                _currentVolume = currentVolumeFinal;
+                                _originalVolume = currentVolumeFinal;
+
+                                volume.setMax(maxVolumeFinal);
+                                volume.setProgress(currentVolumeFinal);
+
+                            }
+                        });
+
+                        break;
+
+                }
+
+            }
+        }).start();
+    }
+
 }

@@ -12,6 +12,11 @@ public class ServerStatusMessage {
     private float MaxVolume = 0;
     private float MinVolume = 0;
     private String PlayerTypeSet = Constants.LocalPlayer;
+    private String SongJson;
+    private Boolean IsShuffleOn = false;
+
+    public ServerStatusMessage() {
+    }
 
     public String getPlayerTypeSet() {
         return PlayerTypeSet;
@@ -29,40 +34,44 @@ public class ServerStatusMessage {
         IsShuffleOn = isShuffleOn;
     }
 
-    private Boolean IsShuffleOn = false;
-
-    public void setMinVolume(float minVolume) {
-        this.MinVolume = minVolume;
+    public String getMessageType() {
+        return messageType;
     }
 
     public void setMessageType(String messageType) {
         this.messageType = messageType;
     }
 
-    public void setCurrentVolume(float currentVolume) {
-        this.CurrentVolume = currentVolume;
-    }
-
-    public void setMaxVolume(float maxVolume) {
-        this.MaxVolume = maxVolume;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
     public float getCurrentVolume() {
         return CurrentVolume;
+    }
+
+    public void setCurrentVolume(float currentVolume) {
+        this.CurrentVolume = currentVolume;
     }
 
     public float getMaxVolume() {
         return MaxVolume;
     }
 
+    public void setMaxVolume(float maxVolume) {
+        this.MaxVolume = maxVolume;
+    }
+
     public float getMinVolume() {
         return MinVolume;
     }
 
-    public ServerStatusMessage() {
+    public void setMinVolume(float minVolume) {
+        this.MinVolume = minVolume;
+    }
+
+    public String getSongJson() {
+
+        return SongJson;
+    }
+
+    public void setSongJson(String songJson) {
+        SongJson = songJson;
     }
 }

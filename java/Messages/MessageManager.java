@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import Interfaces.IListener;
@@ -20,7 +21,8 @@ public class MessageManager implements ISubject {
     public static final String SONG = "song";
     private static MessageManager instance = null;
     private static String TAG = "MessageManager";
-    private IListener mPlayMain = null;
+    private static volatile int mListenerIndex = 0;
+    private ArrayList<IListener> mListeners = new ArrayList<>();
     private TCPCLIENT mTcpClient = null;
     private ServerStatusMessage serverStatusMessage_Obj;
     private Song songObj;
@@ -42,7 +44,6 @@ public class MessageManager implements ISubject {
     public void sendMessage(String msg) {
         if (TCPCLIENT.IsConnected) {
             Log.d("SentToServer", "Sent");
-
             mTcpClient.sendMessage(msg);
         }
     }
@@ -73,6 +74,13 @@ public class MessageManager implements ISubject {
                 case STATUS:
                     Gson gson = new GsonBuilder().create();
                     serverStatusMessage_Obj = gson.fromJson(message, ServerStatusMessage.class);
+                    if (serverStatusMessage_Obj.getSongJson() == null) {
+                        songObj = new Song();
+                        Log.d(TAG, "created empty song");
+
+                    } else if (serverStatusMessage_Obj.getSongJson() != null) {
+                        songObj = gson.fromJson(serverStatusMessage_Obj.getSongJson(), Song.class);
+                    }
                     NotifyUpdates(STATUS);
                     break;
                 default:
@@ -93,12 +101,16 @@ public class MessageManager implements ISubject {
 
     @Override
     public void RegisterListener(IListener listener) {
-        mPlayMain = listener;
+        mListeners.add(listener);
     }
 
     @Override
     public void NotifyUpdates(String what) {
-        mPlayMain.UpdateInfo(what);
+
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).UpdateInfo(what);
+        }
+
     }
 
     /**

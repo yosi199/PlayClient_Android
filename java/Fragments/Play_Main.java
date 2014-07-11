@@ -1,12 +1,11 @@
 package Fragments;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,8 +13,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -29,7 +29,6 @@ import Interfaces.IListener;
 import Messages.MessageManager;
 import Messages.ServerStatusMessage;
 import Messages.Song;
-import Messages.VolumeObject;
 import network.NetworkService;
 import network.TCPCLIENT;
 
@@ -42,20 +41,25 @@ public class Play_Main extends Fragment implements IListener {
     private static final String TAG = "Play_Main_Fragment";
     public static CountDownLatch mCountDown = new CountDownLatch(1);
 
-    Typeface roboto;
+    private Typeface roboto;
 
-    // Views and fields
+    // Views
     private TextView tv1;
+    private TextView pullToConnect;
     private Button connectButton;
-    private SeekBar volume;
+    private SwipeRefreshLayout mSwipeLayout;
+
 
     // Object Instances
     private Play_Main mainFrag;
     private MessageManager messageManager;
 
+    // Animation
+    private Animation fadeIn;
+    private Animation fadeOut;
+
     // Fields
-    private int _currentVolume;
-    private int _originalVolume;
+    private String isConnectedText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,110 +71,42 @@ public class Play_Main extends Fragment implements IListener {
 
         roboto = Typeface.createFromAsset(getActivity().getAssets(), "fonts/robotot.ttf");
 
+        fadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
+        fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
 
         messageManager = MessageManager.Instance();
         messageManager.RegisterListener(mainFrag);
 
+        pullToConnect = (TextView) view.findViewById(R.id.pullToConnect);
+        pullToConnect.setTypeface(roboto);
 
-        volume = (SeekBar) view.findViewById(R.id.seekBar);
-        volume.setVisibility(View.INVISIBLE);
-        volume.setAlpha(0f);
+        if (TCPCLIENT.IsConnected) {
+            pullToConnect.setText(R.string.connected);
+            String json = jsonMaker.toJson(new DeviceInfo());
+            DispatchToServer(json);
 
-        connectButton = (Button) view.findViewById(R.id.connectBT);
-        connectButton.setTypeface(roboto);
-        connectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        }
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
+        mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        mSwipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
-                            // ***** IntentService Way ****** //
-                            Intent intent = new Intent(getActivity(), NetworkService.class);
-                            getActivity().startService(intent);
+        mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                                              @Override
+                                              public void onRefresh() {
 
-                            // Once client is connected, give the server some info about client
-                            mCountDown.await(2000, TimeUnit.MILLISECONDS);
+                                                  pullToConnect.setText(R.string.connecting);
+                                                  startConnecting();
 
-                            String json = jsonMaker.toJson(new DeviceInfo());
-                            DispatchToServer(json);
-
-                            MediaControlsComponent mdc = new MediaControlsComponent();
-
-                            FragmentManager fm = getFragmentManager();
-                            FragmentTransaction ft = fm.beginTransaction();
-                            ft.setCustomAnimations(R.animator.fade_in, android.R.animator.fade_out);
-                            ft.add(R.id.mediaControllerFrame, mdc);
-                            ft.commit();
-                            volume.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    volume.setVisibility(View.VISIBLE);
-                                }
-                            });
-
-                            volume.animate().alpha(1f).setDuration(1000).setListener(null);
-
-                        } catch (Exception ie) {
-                            ie.getMessage();
-                        }
-                    }
-                }).start();
-
-            }
-        });
+                                                  Log.d("refreshed", "refreshed");
+                                              }
 
 
-        // Handle SeekBar volume events logic
-        final VolumeObject volumeObject = new VolumeObject();
-        volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                          }
+        );
 
-                if (progress > _currentVolume) {
-                    volumeObject.SetWhichWay("Up");
-                    _currentVolume = progress;
-                } else if (progress < _currentVolume) {
-                    volumeObject.SetWhichWay("Down");
-                    _currentVolume = progress;
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                int stepsDifferent = 0;
-
-                // If the user changed volume up...
-                if (_currentVolume > _originalVolume) {
-                    Log.d("_currentVolume", "" + _currentVolume);
-                    Log.d("_originalVolume", "" + _originalVolume);
-                    stepsDifferent = _currentVolume - _originalVolume;
-                    Log.d("stepsDifferent", "" + stepsDifferent);
-                    _originalVolume = _currentVolume;
-                }
-                // If the user changed volume down...
-                else if (_currentVolume < _originalVolume) {
-                    Log.d("_currentVolume", "" + _currentVolume);
-                    Log.d("_originalVolume", "" + _originalVolume);
-                    stepsDifferent = _originalVolume - _currentVolume;
-                    Log.d("stepsDifferent", "" + stepsDifferent);
-                    _originalVolume = _currentVolume;
-                }
-
-                volumeObject.setProgress(stepsDifferent);
-
-                String json = jsonMaker.toJson(volumeObject);
-                DispatchToServer(json);
-
-            }
-        });
 
         tv1 = (TextView) view.findViewById(R.id.tv1);
         tv1.setTypeface(roboto);
@@ -181,28 +117,44 @@ public class Play_Main extends Fragment implements IListener {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+
+    @Override
     public void UpdateInfo(String whatUpdate) {
 
-        switch (whatUpdate) {
+        final String what = whatUpdate;
 
-            case MessageManager.SONG:
-                getSongUpdate();
-                break;
-            case MessageManager.STATUS:
-                getStatusUpdates();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                switch (what) {
+
+                    case MessageManager.SONG:
+                        getSongUpdate();
+                        break;
+                    case MessageManager.STATUS:
+                        getStatusUpdates();
+                        getSongUpdate();
+                }
+            }
+        }).start();
     }
 
     private void getSongUpdate() {
         final Song song = messageManager.getSongObj();
-
         final String artistName = song.getArtistName();
         final String title = song.getTitleName();
+
 
         tv1.post(new Runnable() {
             @Override
             public void run() {
                 tv1.setText(artistName + " - " + title);
+
             }
         });
 
@@ -213,34 +165,7 @@ public class Play_Main extends Fragment implements IListener {
      * Gets information about values set at the server side
      */
     private void getStatusUpdates() {
-
-
         ServerStatusMessage messageFromServer = messageManager.getServerStatusMessage_Obj();
-
-        // Get shuffle value from server
-        final boolean shuffleOnS = messageFromServer.getIsShuffleOn();
-
-        // Get original Volume values from server
-        final float maxVolume = messageFromServer.getMaxVolume();
-        final float currentVolume = messageFromServer.getCurrentVolume();
-
-        final int maxVolumeFinal = (int) maxVolume;
-        final int currentVolumeFinal = (int) currentVolume;
-
-        volume.post(new Runnable() {
-            @Override
-            public void run() {
-
-                //      shuffle.setChecked(shuffleOnS);
-
-                _currentVolume = currentVolumeFinal;
-                _originalVolume = currentVolumeFinal;
-
-                volume.setMax(maxVolumeFinal);
-                volume.setProgress(currentVolumeFinal);
-
-            }
-        });
     }
 
     /**
@@ -249,7 +174,8 @@ public class Play_Main extends Fragment implements IListener {
      * @param json - the message Object to send as a JSON file
      */
     private void DispatchToServer(final String json) {
-        //  Toast.makeText(getActivity(), json, Toast.LENGTH_SHORT).show();
+
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -280,6 +206,78 @@ public class Play_Main extends Fragment implements IListener {
 
         return false;
     }
+
+    private boolean startConnecting() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    isConnectedText = "";
+
+                    // If the server is not connected, start the service and connect
+                    if (!TCPCLIENT.IsConnected) {
+
+
+                        // ***** IntentService  ****** //
+                        Intent intent = new Intent(getActivity(), NetworkService.class);
+                        getActivity().startService(intent);
+
+
+                        // If server connected - the bool will be true
+                        boolean waitedSuccessfully = mCountDown.await(5000, TimeUnit.MILLISECONDS);
+
+                        if (waitedSuccessfully) {
+                            isConnectedText = getString(R.string.connected);
+                            pullToConnect.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Stop pull-to-refresh
+                                    pullToConnect.setText(isConnectedText);
+                                    mSwipeLayout.setRefreshing(false);
+
+                                    // Once client is connected, give the server some info about client
+                                    final Gson jsonMaker = new Gson();
+
+                                    String json = jsonMaker.toJson(new DeviceInfo());
+                                    DispatchToServer(json);
+                                }
+                            });
+
+
+                        } else if (!waitedSuccessfully) {
+                            isConnectedText = getString(R.string.failed_to_connect);
+                            pullToConnect.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Stop pull-to-refresh
+                                    pullToConnect.setText(isConnectedText);
+                                    mSwipeLayout.setRefreshing(false);
+                                }
+                            });
+
+                        }
+                    } else if (TCPCLIENT.IsConnected) {
+
+                        pullToConnect.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                isConnectedText = getString(R.string.connected);
+                                pullToConnect.setText(isConnectedText);
+                                mSwipeLayout.setRefreshing(false);
+                            }
+                        });
+                    }
+
+                } catch (InterruptedException e) {
+                }
+
+            }
+        }).start();
+
+        return false;
+    }
+
 
     /**
      * Inner class to get device Name for use by server
@@ -321,6 +319,8 @@ public class Play_Main extends Fragment implements IListener {
             }
 
         }
+
+
     }
 }
 
