@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -26,6 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import Interfaces.IListener;
+import Messages.CurrentlyPlayingMessageObject;
 import Messages.MessageManager;
 import Messages.ServerStatusMessage;
 import Messages.Song;
@@ -75,14 +78,17 @@ public class Play_Main extends Fragment implements IListener {
         fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
 
         messageManager = MessageManager.Instance();
+        // Register as a general listener
         messageManager.RegisterListener(mainFrag);
+        // Register as the UI to interact with
+        messageManager.registerUI(mainFrag);
 
         pullToConnect = (TextView) view.findViewById(R.id.pullToConnect);
         pullToConnect.setTypeface(roboto);
 
         if (TCPCLIENT.IsConnected) {
             pullToConnect.setText(R.string.connected);
-            String json = jsonMaker.toJson(new DeviceInfo());
+            String json = jsonMaker.toJson(new CurrentlyPlayingMessageObject());
             DispatchToServer(json);
 
         }
@@ -138,11 +144,15 @@ public class Play_Main extends Fragment implements IListener {
                         break;
                     case MessageManager.STATUS:
                         getStatusUpdates();
-                        getSongUpdate();
                 }
             }
         }).start();
     }
+
+
+    /**
+     * Listener* Gets the song json sent from server
+     */
 
     private void getSongUpdate() {
         final Song song = messageManager.getSongObj();
@@ -153,7 +163,58 @@ public class Play_Main extends Fragment implements IListener {
         tv1.post(new Runnable() {
             @Override
             public void run() {
-                tv1.setText(artistName + " - " + title);
+
+                float xSize = tv1.getX();
+                float ySize = tv1.getY();
+
+                float xScale = tv1.getScaleX();
+                float yScale = tv1.getScaleY();
+
+                final TranslateAnimation xAnimation = new TranslateAnimation(xSize, 10000f, 0f, 0f);
+                final ScaleAnimation sAnimation = new ScaleAnimation(0, xScale, 0, yScale);
+
+
+                xAnimation.setDuration(150);
+                xAnimation.setFillAfter(true);
+                xAnimation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                        tv1.setText(artistName + " - " + title);
+                        tv1.startAnimation(sAnimation);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                tv1.startAnimation(xAnimation);
+
+
+                sAnimation.setDuration(150);
+                sAnimation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
 
             }
         });
@@ -167,6 +228,7 @@ public class Play_Main extends Fragment implements IListener {
     private void getStatusUpdates() {
         ServerStatusMessage messageFromServer = messageManager.getServerStatusMessage_Obj();
     }
+
 
     /**
      * Sends a message back to server
@@ -186,7 +248,6 @@ public class Play_Main extends Fragment implements IListener {
         }).start();
 
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -277,7 +338,6 @@ public class Play_Main extends Fragment implements IListener {
 
         return false;
     }
-
 
     /**
      * Inner class to get device Name for use by server

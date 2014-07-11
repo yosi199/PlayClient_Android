@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Map;
 
+import Fragments.Play_Main;
 import Interfaces.IListener;
 import Interfaces.ISubject;
 import network.TCPCLIENT;
@@ -24,6 +25,7 @@ public class MessageManager implements ISubject {
     private static volatile int mListenerIndex = 0;
     private ArrayList<IListener> mListeners = new ArrayList<>();
     private TCPCLIENT mTcpClient = null;
+    private Play_Main play_main;
     private ServerStatusMessage serverStatusMessage_Obj;
     private Song songObj;
 
@@ -42,6 +44,7 @@ public class MessageManager implements ISubject {
     }
 
     public void sendMessage(String msg) {
+
         if (TCPCLIENT.IsConnected) {
             Log.d("SentToServer", "Sent");
             mTcpClient.sendMessage(msg);
@@ -93,6 +96,10 @@ public class MessageManager implements ISubject {
 
     public void registerTcpClient(TCPCLIENT client) {
         mTcpClient = client;
+    }
+
+    public void registerUI(Play_Main main) {
+        play_main = main;
     }
 
     /**

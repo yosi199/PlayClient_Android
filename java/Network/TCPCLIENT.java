@@ -45,7 +45,7 @@ public class TCPCLIENT {
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
 
-            // inform the server and kill the connetion
+            // inform the server and kill the connection
             if (message.contains("CloseSelf")) {
                 Gson gson = new Gson();
                 String killJSON = gson.toJson(new KillAndRestartMessageObject());
