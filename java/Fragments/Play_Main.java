@@ -86,12 +86,10 @@ public class Play_Main extends Fragment implements IListener {
         pullToConnect = (TextView) view.findViewById(R.id.pullToConnect);
         pullToConnect.setTypeface(roboto);
 
-        if (TCPCLIENT.IsConnected) {
-            pullToConnect.setText(R.string.connected);
-            String json = jsonMaker.toJson(new CurrentlyPlayingMessageObject());
-            DispatchToServer(json);
+        tv1 = (TextView) view.findViewById(R.id.tv1);
+        tv1.setTypeface(roboto);
+        tv1.setText("Connect and start playing");
 
-        }
 
         mSwipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         mSwipeLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -113,10 +111,12 @@ public class Play_Main extends Fragment implements IListener {
                                           }
         );
 
+        if (TCPCLIENT.IsConnected) {
+            pullToConnect.setText(R.string.connected);
+            String json = jsonMaker.toJson(new CurrentlyPlayingMessageObject());
+            DispatchToServer(json);
 
-        tv1 = (TextView) view.findViewById(R.id.tv1);
-        tv1.setTypeface(roboto);
-        tv1.setText("Connect and start playing");
+        }
 
 
         return view;
@@ -201,7 +201,6 @@ public class Play_Main extends Fragment implements IListener {
                 sAnimation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
-
                     }
 
                     @Override
