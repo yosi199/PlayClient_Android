@@ -127,6 +127,11 @@ public class Play_Main extends Fragment implements IListener {
         super.onPause();
     }
 
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "Play_Main fragment destroyed");
+        super.onDestroy();
+    }
 
     @Override
     public void UpdateInfo(String whatUpdate) {

@@ -26,7 +26,7 @@ public class TCPCLIENT {
     public static final int SERVERPORT = 5555;
     public static Boolean IsConnected = false;
     // Server readers/writers
-    private boolean mRun = false;
+    private static boolean mRun = false;
     private PrintWriter out;
     private BufferedReader in;
 
@@ -40,6 +40,11 @@ public class TCPCLIENT {
         // get the messageHandler instance and pass the message
         messageHandler = MessageManager.Instance();
         messageHandler.registerTcpClient(this);
+    }
+
+    public static void stopClient() {
+        mRun = false;
+        IsConnected = false;
     }
 
     public void sendMessage(String message) {
@@ -62,11 +67,6 @@ public class TCPCLIENT {
                 out.flush();
             }
         }
-    }
-
-    public void stopClient() {
-        mRun = false;
-        IsConnected = false;
     }
 
     public void run() {
