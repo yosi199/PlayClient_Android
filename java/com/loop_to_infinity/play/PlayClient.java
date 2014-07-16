@@ -78,14 +78,14 @@ public class PlayClient extends Activity {
                 switch (position) {
                     case 0:  // Local PC media player
                         FragmentTransaction ft2 = fm.beginTransaction();
-                        ft2.replace(R.id.frameContainer, main, "main");
+                        ft2.replace(R.id.frameContainer, new Play_Main(), "main");
                         ft2.commit();
                         mDrawer.closeDrawers();
                         break;
 
                     case 1:  // Open the SoundCloud fragment
                         FragmentTransaction ft = fm.beginTransaction();
-                        ft.replace(R.id.frameContainer, mSoundCloudFrag, "soundCloudFrag");
+                        ft.replace(R.id.frameContainer, new SoundCloudFragment(), "soundCloudFrag");
                         ft.commit();
 
                         mDrawer.closeDrawers();

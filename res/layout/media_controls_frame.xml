@@ -42,8 +42,10 @@
             android:layout_margin="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:background="@android:drawable/ic_media_previous"
+            android:background="@drawable/rewind"
             android:drawablePadding="20dp" />
+        <!--  android:background="@android:drawable/ic_media_previous"-->
+
 
         <Button
             android:id="@+id/play_pause"
@@ -54,7 +56,7 @@
 
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:background="@android:drawable/ic_media_play"
+            android:background="@drawable/playbutton"
             android:drawablePadding="20dp" />
 
         <Button
@@ -65,7 +67,7 @@
             android:layout_margin="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:background="@android:drawable/ic_media_next"
+            android:background="@drawable/forward"
             android:drawablePadding="20dp" />
 
     </LinearLayout>
